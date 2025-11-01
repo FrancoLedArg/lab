@@ -1,5 +1,6 @@
 import { useFormContext } from "@/hooks/form";
 import { Button } from "@/components/ui/button";
+import { LoaderCircle } from "lucide-react";
 
 export default function SubscribeButton({ label }: { label: string }) {
   const form = useFormContext();
@@ -8,7 +9,7 @@ export default function SubscribeButton({ label }: { label: string }) {
     <form.Subscribe selector={(state) => state.isSubmitting}>
       {(isSubmitting) => (
         <Button variant='outline' disabled={isSubmitting} aria-label='submit'>
-          {label}
+          {isSubmitting ? <LoaderCircle className='animate-spin' /> : label}
         </Button>
       )}
     </form.Subscribe>

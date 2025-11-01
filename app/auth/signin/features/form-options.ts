@@ -7,7 +7,7 @@ export const formOptions = {
   },
   validators: {
     onSubmit: z.object({
-      email: z.string().email("El email es invalido"),
+      email: z.email("El email es invalido"),
       password: z
         .string()
         .min(8, "La contraseña debe tener al menos 8 caracteres"),

@@ -5,9 +5,6 @@ export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "production"]),
     DATABASE_URL: z.url(),
-    POSTGRES_USER: z.string().min(1),
-    POSTGRES_PASSWORD: z.string().min(1),
-    POSTGRES_DB: z.string().min(1),
     BETTER_AUTH_SECRET: z.string().min(1),
   },
 

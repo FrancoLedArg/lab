@@ -1,26 +1,40 @@
 "use client";
 
-// Features
+import { redirect } from "next/navigation";
+
+// Form
 import { ChildForm } from "./features/child-form";
 import { formOptions } from "./features/form-options";
 import { useAppForm } from "@/hooks/form";
 
 // Actions
-import { signinAction } from "./actions/signin";
+import { useAction } from "next-safe-action/hooks";
+import { signin } from "@/actions/auth";
+
+// Shadcn
+import { toast } from "sonner";
 
 export default function Page() {
-  const form = useAppForm({
-    ...formOptions,
+  const { execute, isExecuting } = useAction(signin, {
+    onSuccess: ({ data }) => {
+      toast.success(data.message);
 
-    onSubmit: async ({ value }) => {
-      const res = await signinAction(value);
-
-      if (res.success) {
-        console.log("Success:", res);
-      } else {
-        console.log("Error:", res);
-      }
+      redirect("/");
+    },
+    onError: ({ error }) => {
+      toast.error("Error al iniciar sesión.", {
+        description: error.serverError,
+      });
     },
   });
-  return <ChildForm form={form} title='Iniciar sesión' />;
+
+  const form = useAppForm({
+    ...formOptions,
+    onSubmit: async ({ value }) => {
+      execute(value);
+    },
+  });
+  return (
+    <ChildForm form={form} title='Iniciar sesión' isExecuting={isExecuting} />
+  );
 }
