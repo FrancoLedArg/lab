@@ -2,16 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // Shadcn
 import { toast } from "sonner";
 
 export default function Page() {
+  const router = useRouter();
+
   const handleClick = async () => {
     await authClient.signOut();
     toast.success("Sesión cerrada correctamente");
-    redirect("/auth/signin");
+    router.push("/auth/signin");
   };
 
   return (

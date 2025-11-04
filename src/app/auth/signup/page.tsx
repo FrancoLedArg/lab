@@ -1,6 +1,6 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // Form
 import { ChildForm } from "./features/child-form";
@@ -9,20 +9,21 @@ import { useAppForm } from "@/hooks/form";
 
 // Actions
 import { useAction } from "next-safe-action/hooks";
-import { signin } from "@/actions/auth";
+import { signup } from "@/actions/auth";
 
 // Shadcn
 import { toast } from "sonner";
 
 export default function Page() {
-  const { execute, isExecuting } = useAction(signin, {
+  const router = useRouter();
+
+  const { execute, isExecuting } = useAction(signup, {
     onSuccess: ({ data }) => {
       toast.success(data.message);
-
-      redirect("/");
+      router.push("/auth/signin");
     },
     onError: ({ error }) => {
-      toast.error("Error al iniciar sesión.", {
+      toast.error("Error al crear el usuario.", {
         description: error.serverError,
       });
     },
@@ -35,6 +36,6 @@ export default function Page() {
     },
   });
   return (
-    <ChildForm form={form} title='Iniciar sesión' isExecuting={isExecuting} />
+    <ChildForm form={form} title='Registrarse' isExecuting={isExecuting} />
   );
 }
