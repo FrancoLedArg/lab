@@ -3,7 +3,7 @@
 import { actionClient } from "@/lib/safe-action";
 import { db } from "@/lib/db";
 import { patient } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
 import type { InferInsertModel } from "drizzle-orm";
 import { z } from "zod";
@@ -22,6 +22,40 @@ export const getAllPatients = actionClient
     });
 
     return patients;
+  });
+
+/**
+ * Obtiene pacientes agrupados por día de creación
+ * Retorna un objeto donde las claves son fechas (YYYY-MM-DD) y los valores son arrays de pacientes
+ */
+export const getPatientsByDay = actionClient
+  .metadata({ actionName: "getPatientsByDay" })
+  .action(async () => {
+    const patients = await db.query.patient.findMany({
+      orderBy: [desc(patient.createdAt)],
+    });
+
+    // Agrupar pacientes por día
+    const patientsByDay: Record<string, typeof patients> = {};
+
+    patients.forEach((patient) => {
+      const dateKey = patient.createdAt.toISOString().split("T")[0]; // YYYY-MM-DD
+      if (!patientsByDay[dateKey]) {
+        patientsByDay[dateKey] = [];
+      }
+      patientsByDay[dateKey].push(patient);
+    });
+
+    // Convertir a array ordenado por fecha (más reciente primero)
+    const sortedDays = Object.entries(patientsByDay).sort(
+      (a, b) => b[0].localeCompare(a[0])
+    );
+
+    return sortedDays.map(([date, patients]) => ({
+      date,
+      patients,
+      count: patients.length,
+    }));
   });
 
 export const getPatientById = actionClient
