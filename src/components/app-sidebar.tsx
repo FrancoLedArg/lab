@@ -15,49 +15,86 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
-  Home,
-  Users,
-  FileText,
-  FlaskConical,
-  LogOut,
-} from "lucide-react";
+  HouseIcon,
+  UsersIcon,
+  FileTextIcon,
+  FlaskIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
+import { NavUser } from "@/components/nav-user";
+import { NavSignIn } from "@/components/nav-signin";
 
 const menuItems = [
   {
     title: "Inicio",
     url: "/",
-    icon: Home,
+    icon: HouseIcon,
   },
   {
     title: "Pacientes",
     url: "/patients",
-    icon: Users,
+    icon: UsersIcon,
   },
   {
     title: "Prácticas",
     url: "/practices",
-    icon: FlaskConical,
+    icon: FlaskIcon,
   },
   {
     title: "Resultados",
     url: "/results",
-    icon: FileText,
+    icon: FileTextIcon,
   },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  user: {
+    name: string;
+    email: string;
+    image?: string | null;
+  } | null;
+}
+
+export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon" variant="sidebar">
+    <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
-          <FlaskConical className="h-6 w-6" />
-          <span className="font-semibold text-lg">Laboratorio</span>
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/" className="flex items-center gap-2">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <FlaskIcon className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Laboratorio</span>
+                  <span className="truncate text-xs">Sistema de Gestión</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Acciones Rápidas</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="#">
+                    <PlusIcon className="h-5 w-5" />
+                    <span>Nueva extracción de sangre</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarGroup>
           <SidebarGroupLabel>Navegación</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -81,16 +118,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/auth/signout">
-                <LogOut className="h-5 w-5" />
-                <span>Cerrar sesión</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {user ? <NavUser user={user} /> : <NavSignIn />}
       </SidebarFooter>
     </Sidebar>
   );

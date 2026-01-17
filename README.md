@@ -31,28 +31,33 @@ Sistema de gestión para laboratorios de análisis clínicos que permite adminis
 ## 🚀 Instalación
 
 1. Clonar el repositorio:
+
 ```bash
 git clone <repository-url>
 cd lab
 ```
 
 2. Instalar dependencias:
+
 ```bash
 pnpm install
 ```
 
 3. Configurar variables de entorno:
+
 ```bash
 cp .env.example .env
 # Editar .env con tus valores
 ```
 
 4. Configurar la base de datos:
+
 ```bash
 pnpm db:push
 ```
 
 5. Iniciar el servidor de desarrollo:
+
 ```bash
 pnpm dev
 ```
@@ -153,5 +158,3 @@ El sistema está en desarrollo activo. Funcionalidades planificadas:
 - [ ] Integración con sistemas de laboratorios externos
 - [ ] Reportes financieros y analíticos
 - [ ] Notificaciones automáticas a pacientes
-
-

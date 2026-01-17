@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 // Next Safe Action
 import { useAction } from "next-safe-action/hooks";
-import { updatePatient } from "@/actions/patients";
+import { createPatient } from "@/actions/patients";
 
 // Shadcn
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -21,14 +21,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 // Components
-import TextField from "@/components/Form/text-field";
-import SubmitButton from "@/components/Form/submit-button";
-
-// Types
-import type { InferSelectModel } from "drizzle-orm";
-import type { patient } from "@/lib/db/schema";
-
-type Patient = InferSelectModel<typeof patient>;
+import TextField from "@/components/form/text-field";
+import SubmitButton from "@/components/form/submit-button";
 
 const schema = z.object({
   id: z
@@ -45,20 +39,16 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-interface FormProps {
-  patient: Patient;
-}
-
-export function Form({ patient }: FormProps) {
+export default function Page() {
   const router = useRouter();
 
-  const { execute, isExecuting } = useAction(updatePatient, {
+  const { execute, isExecuting } = useAction(createPatient, {
     onSuccess: ({ data }) => {
       toast.success(data.message);
       router.push("/patients");
     },
     onError: ({ error }) => {
-      toast.error("Error al actualizar el paciente.", {
+      toast.error("Error al crear el paciente.", {
         description: error.serverError,
       });
     },
@@ -67,10 +57,10 @@ export function Form({ patient }: FormProps) {
   const methods = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      id: patient.id.toString(),
-      firstName: patient.firstName,
-      lastName: patient.lastName,
-      phone: patient.phone,
+      id: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
     },
   });
 
@@ -83,9 +73,9 @@ export function Form({ patient }: FormProps) {
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Editar Paciente</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Crear Paciente</h1>
         <p className="text-muted-foreground mt-2">
-          Actualiza la información del paciente
+          Registra un nuevo paciente en el sistema
         </p>
       </div>
 
@@ -98,12 +88,12 @@ export function Form({ patient }: FormProps) {
             <form onSubmit={handleSubmit(onSubmit)}>
               <FieldGroup>
                 <FieldSet>
-                  <TextField name="id" label="Documento de Identidad" disabled />
+                  <TextField name="id" label="Documento de Identidad" />
                   <TextField name="firstName" label="Nombre" />
                   <TextField name="lastName" label="Apellido" />
                   <TextField name="phone" label="Teléfono" />
                   <SubmitButton
-                    label="Actualizar Paciente"
+                    label="Crear Paciente"
                     isExecuting={isExecuting}
                   />
                 </FieldSet>

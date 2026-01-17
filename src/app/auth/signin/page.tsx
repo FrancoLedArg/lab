@@ -21,9 +21,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 // Components
-import TextField from "@/components/Form/text-field";
-import PasswordField from "@/components/Form/password-field";
-import SubmitButton from "@/components/Form/submit-button";
+import TextField from "@/components/form/text-field";
+import PasswordField from "@/components/form/password-field";
+import SubmitButton from "@/components/form/submit-button";
 
 const schema = z.object({
   email: z.email("El email es invalido"),

@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { FileText } from "@phosphor-icons/react/ssr";
 
 export default async function ResultsPage() {
   return (
@@ -32,7 +32,8 @@ export default async function ResultsPage() {
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p className="text-lg mb-2">Funcionalidad en desarrollo</p>
             <p className="text-sm">
-              La gestión de resultados estará disponible en una próxima actualización
+              La gestión de resultados estará disponible en una próxima
+              actualización
             </p>
           </div>
         </CardContent>
