@@ -1,195 +1,157 @@
-# 🏥 Medical Biochemistry Lab Management System
+# Medical Biochemistry Lab Management System
 
-A modern, web-based laboratory management system designed to streamline patient data management, bloodwork result processing, and report generation for medical biochemistry labs.
+Sistema de gestión para laboratorios de análisis clínicos que permite administrar pacientes, órdenes médicas, autorizaciones, derivaciones a laboratorios externos, ingreso y validación de resultados, y entrega de informes.
 
-## ✨ Features
+## 🎯 Características Principales
 
-### 🔄 Streamlined Workflow
+- **Gestión de Pacientes**: Registro y administración de pacientes con separación entre paciente real y titular administrativo
+- **Órdenes Médicas**: Gestión de órdenes médicas con múltiples prácticas bioquímicas
+- **Autorizaciones**: Control de autorizaciones de obras sociales con soporte para autorizaciones parciales
+- **Derivaciones**: Trazabilidad completa de muestras derivadas a laboratorios externos
+- **Resultados**: Ingreso y validación de resultados con trazabilidad de quién ingresó y quién validó
+- **Entrega de Resultados**: Gestión de entregas físicas y digitales de informes
 
-- **Unified System**: Capture all patient information and lab requirements in one place
-- **No Double Entry**: Eliminate manual data transfer from folders to legacy software
-- **Fast Data Entry**: Configurable shortcuts for rapid result input
+## 🛠️ Stack Tecnológico
 
-### 📱 Remote Access & Validation
+- **Framework**: Next.js 16 con App Router
+- **Runtime**: React 19, TypeScript
+- **Base de Datos**: PostgreSQL (Neon) con Drizzle ORM
+- **Autenticación**: Better Auth
+- **Validación**: Zod, next-safe-action
+- **UI**: shadcn/ui, Tailwind CSS, React Hook Form
+- **Monitoreo**: Sentry para error tracking
 
-- **Remote Validation**: Doctors can review and validate results from anywhere
-- **Mobile-Friendly**: Responsive design for phone and tablet access
-- **Multi-Location Support**: Work seamlessly across multiple lab locations
-
-### 📊 Advanced Lab Management
-
-- **Flexible Lab Practices**: Dynamic, user-configurable lab practice definitions
-- **Multi-Field Results**: Support complex analyses (physical, chemical, microscopical sections)
-- **Authorization Tracking**: Track social security provider authorization status per practice
-- **Reference Values**: Per-field reference ranges with validation alerts
-
-### 📄 Professional Reports
-
-- **PDF Generation**: Generate professional lab reports
-- **Browser Printing**: Direct print support from the browser
-- **Digital Signatures**: Doctor digital signatures on all reports
-
-### 🔍 Improved Data Access
-
-- **Fast Search**: Quick retrieval of historical bloodwork data
-- **Status Tracking**: Clear visibility into result status (draft → pending validation → validated → final)
-- **Audit Functions**: Track reports by doctor, provider, and time period
-
-### 🔐 Secure Authentication
-
-- **Passwordless Login**: Simplified authentication for lab staff
-- **Better Auth**: Secure, modern authentication system
-
-## 🛠️ Tech Stack
-
-### Core Framework
-
-- **Next.js 16** - React framework with App Router
-- **React 19** - UI library with Server Components
-- **TypeScript** - Type-safe development
-
-### Data & Backend
-
-- **Drizzle ORM** - Type-safe database toolkit
-- **PostgreSQL** - Database (Neon Serverless)
-- **Better Auth** - Authentication system
-- **next-safe-action** - Type-safe server actions
-
-### UI & Styling
-
-- **shadcn/ui** - High-quality component library
-- **Radix UI** - Accessible component primitives
-- **Tailwind CSS 4** - Utility-first styling
-- **TanStack React Form** - Powerful form management
-- **Sonner** - Toast notifications
-
-### Validation & Monitoring
-
-- **Zod** - Schema validation
-- **Sentry** - Error tracking and monitoring
-
-## 🚀 Getting Started
-
-### Prerequisites
+## 📋 Requisitos Previos
 
 - Node.js 18+
-- pnpm (or npm/yarn)
-- PostgreSQL database (Neon recommended)
+- pnpm
+- PostgreSQL
+- Variables de entorno configuradas (ver `.env.example`)
 
-### Installation
+## 🚀 Instalación
 
-1. Clone the repository
-
+1. Clonar el repositorio:
 ```bash
-git clone <your-repo-url>
+git clone <repository-url>
 cd lab
 ```
 
-2. Install dependencies
-
+2. Instalar dependencias:
 ```bash
 pnpm install
 ```
 
-3. Set up environment variables
-
+3. Configurar variables de entorno:
 ```bash
 cp .env.example .env
-# Edit .env with your database credentials and other config
+# Editar .env con tus valores
 ```
 
-4. Set up the database
-
+4. Configurar la base de datos:
 ```bash
 pnpm db:push
 ```
 
-5. Run the development server
-
+5. Iniciar el servidor de desarrollo:
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+La aplicación estará disponible en `http://localhost:3000`.
 
-## 📁 Project Structure
+## 📁 Estructura del Proyecto
 
 ```
-lab/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   └── auth/             # Authentication pages
-├── actions/               # Server actions
-├── components/           # React components
-│   ├── ui/              # shadcn/ui components
-│   └── Form/            # Form components
-├── lib/                  # Shared utilities
-│   ├── auth/            # Auth configuration
-│   ├── db/              # Database schema & utilities
-│   └── validation/      # Zod schemas
-├── config/               # Configuration files
-└── public/               # Static assets
+src/
+├── app/                    # App Router de Next.js
+│   ├── auth/              # Rutas de autenticación
+│   ├── patients/          # Gestión de pacientes
+│   ├── practices/         # Catálogo de prácticas
+│   └── results/           # Gestión de resultados
+├── actions/                # Server actions (next-safe-action)
+├── components/             # Componentes React reutilizables
+│   ├── Form/              # Componentes de formulario
+│   └── ui/                 # Componentes UI (shadcn/ui)
+├── lib/
+│   ├── auth/              # Configuración de Better Auth
+│   ├── db/                 # Configuración de Drizzle ORM
+│   │   └── schema.ts       # Esquema de base de datos
+│   ├── validation/         # Schemas de validación Zod
+│   └── safe-action.ts      # Configuración de next-safe-action
+└── config/                 # Configuraciones (Drizzle, env, etc.)
 ```
 
-## 🗄️ Database
+## 🗄️ Modelo de Datos
 
-### Available Commands
+El sistema modela los siguientes conceptos principales del dominio:
 
-- `pnpm db:push` - Push schema changes to database
-- `pnpm db:studio` - Open Drizzle Studio (database GUI)
+### Entidades Principales
 
-## 🎯 Key Workflows
+- **Paciente**: Persona real a la que pertenecen las muestras y resultados
+- **Titular Administrativo**: Persona cuyas credenciales se usan para autorizar (puede diferir del paciente)
+- **Orden Médica**: Documento con prácticas solicitadas
+- **Autorización**: Comprobante que habilita el cobro de prácticas
+- **Práctica**: Práctica bioquímica del catálogo
+- **Muestra**: Muestra biológica con trazabilidad completa
+- **Resultado**: Valores obtenidos del procesamiento
+- **Validación**: Validación explícita por bioquímica
+- **Entrega**: Entrega de resultados al paciente
 
-### Lab Order Creation
+### Invariantes del Dominio
 
-1. Patient visits lab (new or returning)
-2. Blood extraction performed
-3. New lab order created with requested practices
-4. Authorization status recorded per practice
+1. **Ninguna práctica es facturable sin autorización válida**
+2. **Toda práctica derivada debe existir administrativamente a nombre del titular**
+3. **Los resultados siempre están a nombre del paciente real, no del titular administrativo**
+4. **Toda muestra debe ser trazable (dónde se procesó, identificador externo)**
+5. **Un informe solo se entrega si todas las prácticas tienen resultados validados**
 
-### Results Entry & Validation
+## 🔐 Autenticación
 
-1. Technician enters results using shortcuts
-2. Status: `draft` → `pending_validation`
-3. Doctor reviews and edits results
-4. Doctor validates: `validated` → `final`
-5. PDF report generated with digital signature
+El sistema utiliza Better Auth para la autenticación. Actualmente soporta:
 
-## 📝 Development Guidelines
+- Autenticación por email y contraseña
+- Sesiones seguras con cookies HTTP-only
 
-- **Type Safety**: Full TypeScript coverage with strict mode
-- **Validation**: All user inputs validated with Zod
-- **Error Handling**: Comprehensive error boundaries and user feedback
-- **Code Quality**: Focus on readability, modularity, and reusability
-- **Best Practices**: Follow Next.js and React best practices
+## 📝 Scripts Disponibles
 
-## 🔒 Security & Privacy
+- `pnpm dev`: Inicia el servidor de desarrollo
+- `pnpm build`: Construye la aplicación para producción
+- `pnpm start`: Inicia el servidor de producción
+- `pnpm lint`: Ejecuta el linter
+- `pnpm db:push`: Sincroniza el esquema con la base de datos
+- `pnpm db:studio`: Abre Drizzle Studio para explorar la base de datos
 
-- **Data Protection**: Sensitive medical data never exposed in logs or errors
-- **Server-Side Only**: Database queries and sensitive operations server-side only
-- **Input Validation**: Client and server-side validation for all inputs
-- **Environment Variables**: All secrets stored securely in environment variables
+## 🧪 Desarrollo
 
-## 🗺️ Roadmap
+### Convenciones de Código
 
-- [x] Basic authentication
-- [x] Patient management
-- [ ] Lab practice management
-- [ ] Results entry with shortcuts
-- [ ] Remote validation workflow
-- [ ] PDF report generation
-- [ ] Role-based access control
-- [ ] GUI for lab practices (replacing shortcuts)
-- [ ] Report templates
+- **Server Actions**: Usar `next-safe-action` con validación Zod
+- **Queries**: Preferir la API relacional de Drizzle (`db.query.*.findMany()`)
+- **Formularios**: React Hook Form con validación Zod
+- **Manejo de Errores**: Logging a Sentry, mensajes amigables al usuario
 
-## 📄 License
+### Mejores Prácticas
 
-Private project - All rights reserved
+- Priorizar componentes Server cuando no se necesita interactividad
+- Validación tanto en cliente (UX) como en servidor (seguridad)
+- Nunca fallar silenciosamente - siempre mostrar feedback al usuario
+- Mantener trazabilidad completa de todas las operaciones críticas
 
-## 👥 Contributing
+## 📚 Documentación Adicional
 
-This is an internal project. For questions or suggestions, please contact the development team.
+- [Requisitos del Dominio](.cursor/rules/domain-requirements.mdc): Documentación detallada de la lógica de negocio
+- [Instrucciones de Desarrollo](.cursor/rules/instructions.mdc): Guías de desarrollo y patrones
+- [Mejores Prácticas Next.js](.cursor/rules/rules.mdc): Patrones y anti-patrones de Next.js
 
----
+## 🚧 Estado del Proyecto
 
-**Built with ❤️ for modern medical laboratories**
+El sistema está en desarrollo activo. Funcionalidades planificadas:
+
+- [ ] Control de acceso basado en roles (RBAC)
+- [ ] GUI para gestión del catálogo de prácticas
+- [ ] Automatización de autorizaciones con plataformas externas
+- [ ] Integración con sistemas de laboratorios externos
+- [ ] Reportes financieros y analíticos
+- [ ] Notificaciones automáticas a pacientes
+
+

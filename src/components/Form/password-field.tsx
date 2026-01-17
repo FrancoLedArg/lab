@@ -1,26 +1,40 @@
-import { useFieldContext } from "@/hooks/form";
+"use client";
+
+import { useFormContext } from "react-hook-form";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { get } from "react-hook-form";
 
-export default function PasswordField({ label }: { label: string }) {
-  const field = useFieldContext<string>();
+export default function PasswordField({
+  name,
+  label,
+}: {
+  name: string;
+  label: string;
+}) {
+  const {
+    register,
+    trigger,
+    formState: { errors },
+  } = useFormContext();
+
+  const error = get(errors, name)?.message as string | undefined;
 
   return (
     <Field>
-      <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      <FieldLabel htmlFor={name}>{label}</FieldLabel>
       <Input
-        type='password'
-        id={field.name}
-        name={field.name}
-        value={field.state.value}
-        onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value)}
+        type="password"
+        id={name}
         placeholder={label}
-        autoComplete='off'
+        autoComplete="off"
+        {...register(name, {
+          onChange: async () => {
+            await trigger(name);
+          },
+        })}
       />
-      {!field.state.meta.isValid && (
-        <FieldError errors={field.state.meta.errors} />
-      )}
+      {error && <FieldError errors={[{ message: error as string }]} />}
     </Field>
   );
 }

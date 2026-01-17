@@ -1,20 +1,23 @@
 "use client";
 
 // Next
-import Link from "next/link";
+// import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+// Next Safe Action
+import { useAction } from "next-safe-action/hooks";
+import { signup } from "@/actions/auth";
 
 // React Hook Form
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Next Safe Action
-import { useAction } from "next-safe-action/hooks";
-import { signin } from "@/actions/auth";
-
 // Shadcn
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { FieldGroup, FieldSet, FieldSeparator } from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
+// import { Button } from "@/components/ui/button";
+
+// Sonner
 import { toast } from "sonner";
 
 // Zod
@@ -26,22 +29,26 @@ import PasswordField from "@/components/Form/password-field";
 import SubmitButton from "@/components/Form/submit-button";
 
 const schema = z.object({
+  name: z.string().min(1, "El nombre es requerido"),
   email: z.email("El email es invalido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+  confirmPassword: z
+    .string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-export default function Page() {
+export default function Form() {
   const router = useRouter();
 
-  const { execute, isExecuting } = useAction(signin, {
+  const { execute, isExecuting } = useAction(signup, {
     onSuccess: ({ data }) => {
       toast.success(data.message);
-      router.push("/");
+      router.push("/auth/signin");
     },
     onError: ({ error }) => {
-      toast.error("Error al iniciar sesión.", {
+      toast.error("Error al crear el usuario.", {
         description: error.serverError,
       });
     },
@@ -50,8 +57,10 @@ export default function Page() {
   const methods = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -64,33 +73,24 @@ export default function Page() {
   return (
     <Card className="w-full sm:max-w-md">
       <CardHeader>
-        <CardTitle>Iniciar sesión</CardTitle>
+        <CardTitle>Registrarse</CardTitle>
       </CardHeader>
       <CardContent>
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
-              <FieldSet>
-                <TextField name="email" label="Email" />
-                <PasswordField name="password" label="Contraseña" />
-                <SubmitButton
-                  label="Iniciar sesión"
-                  isExecuting={isExecuting}
-                />
-              </FieldSet>
+              <TextField name="name" label="Nombre" />
 
-              <FieldSeparator />
-              <FieldSet>
-                <p className="text-center">
-                  ¿No tienes una cuenta?{" "}
-                  <Link
-                    href="/auth/signup"
-                    className="opacity-60 transition-opacity hover:opacity-100"
-                  >
-                    Registrate
-                  </Link>
-                </p>
-              </FieldSet>
+              <TextField name="email" label="Email" />
+
+              <PasswordField name="password" label="Contraseña" />
+
+              <PasswordField
+                name="confirmPassword"
+                label="Confirmar contraseña"
+              />
+
+              <SubmitButton label="Registrarse" isExecuting={isExecuting} />
             </FieldGroup>
           </form>
         </FormProvider>

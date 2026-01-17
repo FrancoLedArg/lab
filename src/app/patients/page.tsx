@@ -16,19 +16,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus, Users } from "lucide-react";
 
 export default async function PatientsPage() {
   const res = await getAllPatients();
 
   if (!res || !res.data) {
     return (
-      <div className="w-full max-w-7xl p-6">
+      <div className="w-full max-w-7xl mx-auto">
         <Card>
           <CardHeader>
             <CardTitle>Error</CardTitle>
             <CardDescription>
-              {res.serverError || "Failed to load patients"}
+              {res.serverError || "Error al cargar los pacientes"}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -39,40 +39,70 @@ export default async function PatientsPage() {
   const { data } = res;
 
   return (
-    <div className="w-full max-w-7xl p-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Users className="h-8 w-8" />
+            Pacientes
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Listado completo de todos los pacientes registrados
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/patients/create">
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Paciente
+          </Link>
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Pacientes</CardTitle>
+          <CardTitle>Listado de Pacientes</CardTitle>
           <CardDescription>
-            Listado de todos los pacientes registrados ({data.length} total)
+            {data.length} {data.length === 1 ? "paciente registrado" : "pacientes registrados"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {data.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
-              No se encontraron pacientes
+              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg mb-2">No se encontraron pacientes</p>
+              <p className="text-sm mb-4">Comienza creando tu primer paciente</p>
+              <Button asChild>
+                <Link href="/patients/create">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear Paciente
+                </Link>
+              </Button>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>First Name</TableHead>
-                  <TableHead>Last Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Created At</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Apellido</TableHead>
+                  <TableHead>Teléfono</TableHead>
+                  <TableHead>Fecha de Registro</TableHead>
+                  <TableHead className="w-[100px]">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.map((patient) => (
                   <TableRow key={patient.id}>
-                    <TableCell>{patient.id}</TableCell>
+                    <TableCell className="font-medium">{patient.id}</TableCell>
                     <TableCell>{patient.firstName}</TableCell>
                     <TableCell>{patient.lastName}</TableCell>
                     <TableCell>{patient.phone}</TableCell>
                     <TableCell>
-                      {patient.createdAt.toLocaleDateString()}
+                      {patient.createdAt.toLocaleDateString("es-AR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="icon" asChild>

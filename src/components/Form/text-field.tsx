@@ -1,26 +1,43 @@
-import { useFieldContext } from "@/hooks/form";
+"use client";
+
+import { useFormContext } from "react-hook-form";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { get } from "react-hook-form";
 
-export default function TextField({ label }: { label: string }) {
-  const field = useFieldContext<string>();
+export default function TextField({
+  name,
+  label,
+  disabled,
+}: {
+  name: string;
+  label: string;
+  disabled?: boolean;
+}) {
+  const {
+    register,
+    trigger,
+    formState: { errors },
+  } = useFormContext();
+
+  const error = get(errors, name)?.message as string | undefined;
 
   return (
     <Field>
-      <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      <FieldLabel htmlFor={label}>{label}</FieldLabel>
       <Input
-        type='text'
-        id={field.name}
-        name={field.name}
-        value={field.state.value}
-        onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value)}
+        type="text"
+        id={name}
         placeholder={label}
-        autoComplete='off'
+        autoComplete="off"
+        disabled={disabled}
+        {...register(name, {
+          onChange: async () => {
+            await trigger(name);
+          },
+        })}
       />
-      {!field.state.meta.isValid && (
-        <FieldError errors={field.state.meta.errors} />
-      )}
+      {error && <FieldError errors={[{ message: error as string }]} />}
     </Field>
   );
 }
