@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, Users } from "lucide-react";
+import { Pencil, Plus, Users } from "@phosphor-icons/react/ssr";
 
 export default async function PatientsPage() {
   const res = await getAllPatients();
@@ -62,7 +62,10 @@ export default async function PatientsPage() {
         <CardHeader>
           <CardTitle>Listado de Pacientes</CardTitle>
           <CardDescription>
-            {data.length} {data.length === 1 ? "paciente registrado" : "pacientes registrados"}
+            {data.length}{" "}
+            {data.length === 1
+              ? "paciente registrado"
+              : "pacientes registrados"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -70,7 +73,9 @@ export default async function PatientsPage() {
             <div className="py-8 text-center text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg mb-2">No se encontraron pacientes</p>
-              <p className="text-sm mb-4">Comienza creando tu primer paciente</p>
+              <p className="text-sm mb-4">
+                Comienza creando tu primer paciente
+              </p>
               <Button asChild>
                 <Link href="/patients/create">
                   <Plus className="h-4 w-4 mr-2" />

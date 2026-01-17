@@ -14,4 +14,3 @@ export const getAllPractices = actionClient
 
     return practicesList;
   });
-

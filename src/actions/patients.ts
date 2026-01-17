@@ -47,8 +47,8 @@ export const getPatientsByDay = actionClient
     });
 
     // Convertir a array ordenado por fecha (más reciente primero)
-    const sortedDays = Object.entries(patientsByDay).sort(
-      (a, b) => b[0].localeCompare(a[0])
+    const sortedDays = Object.entries(patientsByDay).sort((a, b) =>
+      b[0].localeCompare(a[0])
     );
 
     return sortedDays.map(([date, patients]) => ({

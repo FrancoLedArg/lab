@@ -48,7 +48,10 @@ export default async function PracticesPage() {
         <CardHeader>
           <CardTitle>Listado de Prácticas</CardTitle>
           <CardDescription>
-            {data.length} {data.length === 1 ? "práctica registrada" : "prácticas registradas"}
+            {data.length}{" "}
+            {data.length === 1
+              ? "práctica registrada"
+              : "prácticas registradas"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,7 +72,9 @@ export default async function PracticesPage() {
               <TableBody>
                 {data.map((practice) => (
                   <TableRow key={practice.id}>
-                    <TableCell className="font-medium">{practice.code}</TableCell>
+                    <TableCell className="font-medium">
+                      {practice.code}
+                    </TableCell>
                     <TableCell>{practice.name}</TableCell>
                     <TableCell>{practice.method}</TableCell>
                     <TableCell>
