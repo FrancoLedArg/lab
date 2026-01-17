@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import { getPatientById } from "@/actions/patients";
-import { EditPatientForm } from "./features/edit-form";
+import { Form } from "./form";
 
 export default async function EditPatientPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
   const patientId = parseInt(id, 10);
 
   if (isNaN(patientId)) {
@@ -22,5 +22,5 @@ export default async function EditPatientPage({
 
   const patient = result.data;
 
-  return <EditPatientForm patient={patient} />;
+  return <Form patient={patient} />;
 }

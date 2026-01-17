@@ -1,41 +1,6 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
-// Form
-import { ChildForm } from "./features/child-form";
-import { formOptions } from "./features/form-options";
-import { useAppForm } from "@/hooks/form";
-
-// Actions
-import { useAction } from "next-safe-action/hooks";
-import { signup } from "@/actions/auth";
-
-// Shadcn
-import { toast } from "sonner";
+// Components
+import Form from "./form";
 
 export default function Page() {
-  const router = useRouter();
-
-  const { execute, isExecuting } = useAction(signup, {
-    onSuccess: ({ data }) => {
-      toast.success(data.message);
-      router.push("/auth/signin");
-    },
-    onError: ({ error }) => {
-      toast.error("Error al crear el usuario.", {
-        description: error.serverError,
-      });
-    },
-  });
-
-  const form = useAppForm({
-    ...formOptions,
-    onSubmit: async ({ value }) => {
-      execute(value);
-    },
-  });
-  return (
-    <ChildForm form={form} title='Registrarse' isExecuting={isExecuting} />
-  );
+  return <Form />;
 }
