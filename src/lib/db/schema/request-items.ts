@@ -6,7 +6,7 @@ import {
   pgEnum,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import { medicalRequest, labPractice } from "@/lib/db/schema/";
+import { medicalRequests, labPractice } from "@/lib/db/schema/";
 
 /*
 La entidad "Request Item" es una entidad intermedia con identidad propia.
@@ -52,11 +52,11 @@ export const authorizationStatusEnum = pgEnum("authorization_status", [
   "REJECTED",
 ]);
 
-export const requestItem = pgTable(
-  "request_item",
+export const requestItems = pgTable(
+  "request_items",
   {
     medicalRequestId: integer("medical_request_id")
-      .references(() => medicalRequest.id, { onDelete: "restrict" })
+      .references(() => medicalRequests.id, { onDelete: "restrict" })
       .notNull(),
     labPracticeId: integer("lab_practice_id").references(() => labPractice.id, {
       onDelete: "restrict",
@@ -69,9 +69,6 @@ export const requestItem = pgTable(
       .notNull()
       .default("AUTHORIZED"),
     authorizationDescription: text("authorization_description"),
-    requestedAt: timestamp("requested_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),

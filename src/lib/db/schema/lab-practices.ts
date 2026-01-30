@@ -5,6 +5,7 @@ import { pgTable, text, timestamp, integer, serial } from "drizzle-orm/pg-core";
  * Define las prácticas disponibles en el sistema. Este catálogo puede ser
  * gestionado por GUI en el futuro, pero por ahora se usa directamente.
  */
+
 export const labPractice = pgTable("lab_practice", {
   id: serial("id").primaryKey(),
   code: integer("code").notNull().unique(),
