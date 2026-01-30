@@ -1,30 +1,20 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  integer,
-  serial,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, serial } from "drizzle-orm/pg-core";
 import { patient, administrativeHolder } from "./core";
-import { practice } from "./practices";
+import { labPractice } from "@/lib/db/schema";
 
 /**
  * Orden médica
  * Documento que indica las prácticas bioquímicas solicitadas por un profesional.
  * Una orden puede contener múltiples prácticas y ser autorizada total o parcialmente.
- */
-export const medicalOrder = pgTable("medical_order", {
+ **/
+
+export const medicalRequest = pgTable("medical_request", {
   id: serial("id").primaryKey(),
-  orderNumber: text("order_number").notNull().unique(), // Número de orden médica
+  requestNumber: text("request_number").notNull().unique(), // Número de solicitud médica
   patientId: integer("patient_id")
     .references(() => patient.id, { onDelete: "restrict" })
-    .notNull(), // Paciente real
-  administrativeHolderId: integer("administrative_holder_id")
-    .references(() => administrativeHolder.id, { onDelete: "restrict" })
-    .notNull(), // Titular administrativo (puede ser diferente del paciente)
-  doctorName: text("doctor_name"), // Nombre del profesional que emite la orden
-  diagnosis: text("diagnosis"), // Diagnóstico (si aplica)
-  orderDate: timestamp("order_date")
+    .notNull(),
+  requestedAt: timestamp("requested_at")
     .$defaultFn(() => new Date())
     .notNull(),
   createdAt: timestamp("created_at")

@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { patient, insuranceProvider, administrativeHolder } from "./core";
-import { practice } from "./practices";
+import { practice } from "./lab-practices";
 import { report } from "./reports";
 import { medicalOrder, orderPractice } from "./medical-orders";
 import { authorization, authorizedPractice, copayment } from "./authorizations";
@@ -22,7 +22,7 @@ export const insuranceProviderRelations = relations(
   insuranceProvider,
   ({ many }) => ({
     administrativeHolders: many(administrativeHolder),
-  })
+  }),
 );
 
 export const administrativeHolderRelations = relations(
@@ -33,7 +33,7 @@ export const administrativeHolderRelations = relations(
       references: [insuranceProvider.id],
     }),
     medicalOrders: many(medicalOrder),
-  })
+  }),
 );
 
 export const practiceRelations = relations(practice, ({ many }) => ({
@@ -62,7 +62,7 @@ export const medicalOrderRelations = relations(
     orderPractices: many(orderPractice),
     authorizations: many(authorization),
     resultDeliveries: many(resultDelivery),
-  })
+  }),
 );
 
 export const orderPracticeRelations = relations(
@@ -78,7 +78,7 @@ export const orderPracticeRelations = relations(
     }),
     authorizedPractices: many(authorizedPractice),
     samples: many(sample),
-  })
+  }),
 );
 
 export const authorizationRelations = relations(
@@ -93,7 +93,7 @@ export const authorizationRelations = relations(
       fields: [authorization.id],
       references: [copayment.authorizationId],
     }),
-  })
+  }),
 );
 
 export const authorizedPracticeRelations = relations(
@@ -107,7 +107,7 @@ export const authorizedPracticeRelations = relations(
       fields: [authorizedPractice.orderPracticeId],
       references: [orderPractice.id],
     }),
-  })
+  }),
 );
 
 export const copaymentRelations = relations(copayment, ({ one }) => ({
@@ -163,7 +163,7 @@ export const resultValidationRelations = relations(
       fields: [resultValidation.validatedBy],
       references: [user.id],
     }),
-  })
+  }),
 );
 
 export const resultDeliveryRelations = relations(resultDelivery, ({ one }) => ({
