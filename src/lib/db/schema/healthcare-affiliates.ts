@@ -3,7 +3,7 @@ import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Schemas
-import { healthcareProviders } from "@/lib/db/schema/index";
+import { healthcareProviders, medicalRequests } from "@/lib/db/schema/index";
 
 /*
 La entidad "Healthcare Affiliate" representa la afiliación de una persona
@@ -47,10 +47,11 @@ export const healthcareAffiliates = pgTable("healthcare_affiliates", {
 
 export const healthcareAffiliatesRelations = relations(
   healthcareAffiliates,
-  ({ one }) => ({
+  ({ one, many }) => ({
     healthcareProvider: one(healthcareProviders, {
       fields: [healthcareAffiliates.healthcareProviderId],
       references: [healthcareProviders.id],
     }),
+    medicalRequests: many(medicalRequests),
   }),
 );

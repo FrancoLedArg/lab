@@ -1,4 +1,9 @@
+// Drizzle
 import { pgTable, text, timestamp, integer, serial } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+
+// Schemas
+import { requestItems } from "./request-items";
 
 /**
  * Catálogo de prácticas bioquímicas
@@ -18,3 +23,7 @@ export const labPractice = pgTable("lab_practice", {
     .$defaultFn(() => new Date())
     .notNull(),
 });
+
+export const labPracticeRelations = relations(labPractice, ({ many }) => ({
+  requestItems: many(requestItems),
+}));

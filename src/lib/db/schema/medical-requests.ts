@@ -1,7 +1,11 @@
-import { pgTable, text, timestamp, integer, serial } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, integer, serial, text } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-import { patients, requestItems } from "@/lib/db/schema/index";
+import {
+  healthcareAffiliates,
+  healthcareProviders,
+  requestItems,
+} from "@/lib/db/schema/index";
 
 /*
 Que es la entidad "Medical Request"?
@@ -14,7 +18,13 @@ y que da origen a uno o más análisis a procesar por el laboratorio.
 
 export const medicalRequests = pgTable("medical_requests", {
   id: serial("id").primaryKey(),
-
+  healthcareProviderId: integer("healthcare_provider_id")
+    .references(() => healthcareProviders.id, { onDelete: "restrict" })
+    .notNull(),
+  healthcareAffiliateId: integer("healthcare_affiliate_id")
+    .references(() => healthcareAffiliates.id, { onDelete: "restrict" })
+    .notNull(),
+  diagnosis: text("diagnosis").notNull(),
   requestedAt: timestamp("requested_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -28,7 +38,15 @@ export const medicalRequests = pgTable("medical_requests", {
 
 export const medicalRequestRelations = relations(
   medicalRequests,
-  ({ many }) => ({
+  ({ one, many }) => ({
+    healthcareProvider: one(healthcareProviders, {
+      fields: [medicalRequests.healthcareProviderId],
+      references: [healthcareProviders.id],
+    }),
+    healthcareAffiliate: one(healthcareAffiliates, {
+      fields: [medicalRequests.healthcareAffiliateId],
+      references: [healthcareAffiliates.id],
+    }),
     requestItems: many(requestItems),
   }),
 );
