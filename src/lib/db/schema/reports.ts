@@ -3,15 +3,13 @@ import {
   pgTable,
   pgEnum,
   timestamp,
-  integer,
   serial,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-// Entities
-import { patient } from "./core";
-import { medicalOrder } from "./medical-orders";
-import { result } from "./results";
+// Schemas
+import { medicalRequests } from "@/lib/db/schema/index";
 
 export const reportStatusEnum = pgEnum("report_status", [
   "pending",
@@ -26,12 +24,14 @@ export const deliveryMethodEnum = pgEnum("delivery_method", [
 
 export const report = pgTable("report", {
   id: serial("id").primaryKey(),
-  patientId: integer("patient_id")
-  .references(() => patient.id, { onDelete: "cascade" })
-  .notNull(),
+  medicalRequestId: integer("medical_request_id")
+    .references(() => medicalRequests.id, { onDelete: "restrict" })
+    .notNull(),
   status: reportStatusEnum("status").notNull().default("pending"),
   deliveryDate: timestamp("delivery_date"),
-  deliveryMethod: deliveryMethodEnum("deliver_method").notNull().default("physical"),
+  deliveryMethod: deliveryMethodEnum("deliver_method")
+    .notNull()
+    .default("physical"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -41,10 +41,8 @@ export const report = pgTable("report", {
 });
 
 export const reportRelations = relations(report, ({ one, many }) => ({
-  patient: one(patient, {
-    fields: [report.patientId],
-    references: [patient.id],
+  medicalRequest: one(medicalRequests, {
+    fields: [report.medicalRequestId],
+    references: [medicalRequests.id],
   }),
-  medicalOrders: many(medicalOrder),
-  results: many(result),
 }));

@@ -1,4 +1,7 @@
+export * from "./reports";
 export * from "./lab-practices";
+export * from "./lab-practice-fields";
+export * from "./field-results";
 export * from "./patients";
 export * from "./medical-requests";
 export * from "./request-items";
