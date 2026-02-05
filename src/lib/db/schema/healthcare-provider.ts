@@ -41,7 +41,7 @@ Esta entidad es referenciada por afiliados, pedidos médicos y procesos administ
 actuando como una fuente única de verdad para las reglas asociadas a cada obra social.
 */
 
-const statusEnum = pgEnum("status", [
+export const providerStatusEnum = pgEnum("provider_status", [
   "ENABLED",
   "SUSPENDED",
   "IN_ARREARS",
@@ -53,7 +53,9 @@ export const healthcareProviders = pgTable("healthcare_providers", {
   name: text("name").notNull(),
   alias: text("alias").notNull(),
   code: integer("code").notNull().unique(),
-  status: statusEnum("status").notNull().default("ENABLED"),
+  providerStatus: providerStatusEnum("provider_status")
+    .notNull()
+    .default("ENABLED"),
   ubValue: integer("ub_value").notNull(),
   authorizationInstructions: text("authorization_instructions"),
   copaymentInstructions: text("copayment_instructions"),

@@ -1,14 +1,21 @@
-import { Toaster } from "@/components/ui/sonner";
+// Next
+import Link from "next/link";
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Phosphor
+import { DevToLogoIcon } from "@phosphor-icons/react/ssr";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background p-6">
+    <main className="w-full h-screen flex flex-col items-center justify-center gap-8">
+      <Link
+        href="/"
+        className="flex justify-center items-center gap-2 text-2xl font-bold"
+      >
+        <DevToLogoIcon className="size-10" />
+        Laboratorio Virtual
+      </Link>
+
       {children}
-      <Toaster />
-    </div>
+    </main>
   );
 }

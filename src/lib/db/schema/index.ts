@@ -1,3 +1,4 @@
+export * from "./auth";
 export * from "./reports";
 export * from "./lab-practices";
 export * from "./lab-practice-fields";

@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 
 // Schema
-import * as schema from "./schema";
+import * as schema from "./schema/index";
 
 // Env
 import { env } from "@/config/env";

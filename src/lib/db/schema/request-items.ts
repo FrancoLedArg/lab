@@ -58,16 +58,18 @@ export const requestItems = pgTable(
     medicalRequestId: integer("medical_request_id")
       .references(() => medicalRequests.id, { onDelete: "restrict" })
       .notNull(),
-    labPracticeId: integer("lab_practice_id").references(() => labPractice.id, {
-      onDelete: "restrict",
-    }),
-    normalizationStatus: normalizationStatusEnum("normalization_status")
-      .notNull()
-      .default("NORMALIZED"),
+    labPracticeId: integer("lab_practice_id")
+      .references(() => labPractice.id, {
+        onDelete: "restrict",
+      })
+      .notNull(),
+    normalizationStatus: normalizationStatusEnum(
+      "normalization_status",
+    ).notNull(),
     normalizationDescription: text("issue_description"),
-    authorizationStatus: authorizationStatusEnum("authorization_status")
-      .notNull()
-      .default("AUTHORIZED"),
+    authorizationStatus: authorizationStatusEnum(
+      "authorization_status",
+    ).notNull(),
     authorizationDescription: text("authorization_description"),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())

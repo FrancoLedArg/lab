@@ -1,7 +1,7 @@
 "use client";
 
 // Next
-// import Link from "next/link";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 // Next Safe Action
@@ -13,11 +13,20 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Shadcn
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { FieldGroup } from "@/components/ui/field";
-// import { Button } from "@/components/ui/button";
-
-// Sonner
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  FieldGroup,
+  FieldLabel,
+  FieldDescription,
+  FieldSeparator,
+} from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 // Zod
@@ -72,9 +81,13 @@ export default function Form() {
 
   return (
     <Card className="w-full sm:max-w-md">
-      <CardHeader>
-        <CardTitle>Registrarse</CardTitle>
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">Crea una cuenta</CardTitle>
+        <CardDescription>
+          Ingresa tus datos para crear una cuenta
+        </CardDescription>
       </CardHeader>
+
       <CardContent>
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -95,6 +108,13 @@ export default function Form() {
           </form>
         </FormProvider>
       </CardContent>
+
+      <FieldDescription className="text-center">
+        Ya tienes una cuenta?{" "}
+        <Link href="/auth/signin" className="underline-none">
+          Inicia sesión
+        </Link>
+      </FieldDescription>
     </Card>
   );
 }
