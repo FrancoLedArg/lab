@@ -38,7 +38,8 @@ export default async function Layout({
               </h1>
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-6">{children}</main>
+
+          {children}
         </SidebarInset>
       </SidebarProvider>
     </>
