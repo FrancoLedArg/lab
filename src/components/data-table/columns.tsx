@@ -1,32 +1,102 @@
 "use client";
 
+// Next
+import Link from "next/link";
+
 // Tanstack
 import { ColumnDef } from "@tanstack/react-table";
 
-// Db – use schema row type so columns match query result (e.g. description: string | null)
-import { labPractice } from "@/lib/db/schema";
+// Shadcn
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
-type LabPracticeRow = typeof labPractice.$inferSelect;
+// Phosphor
+import { ArrowUpRight } from "lucide-react";
+
+interface LabPracticeRow {
+  id: number;
+  code: number | null;
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export const columns: ColumnDef<LabPracticeRow>[] = [
   {
-    header: "Código",
     accessorKey: "code",
+    header: "Código",
   },
   {
-    header: "Nombre",
     accessorKey: "name",
+    header: "Nombre",
   },
   {
-    header: "Descripción",
-    accessorKey: "description",
-  },
-  {
-    header: "Fecha de creación",
     accessorKey: "createdAt",
+    header: "Fecha de creación",
+    cell: ({ row }) => {
+      const raw = row.original.createdAt;
+      const date = raw instanceof Date ? raw : new Date(raw as string);
+      const d = date.toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const t = date.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return (
+        <div>
+          {d} {t}
+        </div>
+      );
+    },
   },
   {
-    header: "Fecha de actualización",
     accessorKey: "updatedAt",
+    header: "Fecha de actualización",
+    cell: ({ row }) => {
+      const raw = row.original.updatedAt;
+      const date = raw instanceof Date ? raw : new Date(raw as string);
+      const d = date.toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const t = date.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return (
+        <div>
+          {d} {t}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "link",
+    header: "Link",
+    cell: ({ row }) => {
+      console.log(row.original);
+
+      return (
+        <Button variant="ghost" size="icon" asChild>
+          <Link href={`/practices/${row.original.id}`}>
+            <ArrowUpRight />
+          </Link>
+        </Button>
+      );
+    },
   },
 ];

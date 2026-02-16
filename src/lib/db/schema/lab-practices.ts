@@ -1,5 +1,12 @@
 // Drizzle
-import { pgTable, text, timestamp, integer, serial } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  integer,
+  serial,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Schemas
@@ -11,11 +18,19 @@ import { labPracticeFields, requestItems } from "@/lib/db/schema/index";
  * gestionado por GUI en el futuro, pero por ahora se usa directamente.
  */
 
-export const labPractice = pgTable("lab_practice", {
+export const labPracticeStatusEnum = pgEnum("lab_practice_status", [
+  "DRAFT",
+  "ACTIVE",
+  "INACTIVE",
+]);
+
+export const labPractices = pgTable("lab_practices", {
   id: serial("id").primaryKey(),
-  code: integer("code").notNull().unique(),
+  code: integer("code").unique(),
   name: text("name").notNull(),
-  description: text("description"),
+  status: labPracticeStatusEnum("lab_practice_status")
+    .notNull()
+    .default("DRAFT"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -24,7 +39,7 @@ export const labPractice = pgTable("lab_practice", {
     .notNull(),
 });
 
-export const labPracticeRelations = relations(labPractice, ({ many }) => ({
+export const labPracticeRelations = relations(labPractices, ({ many }) => ({
   labPracticeFields: many(labPracticeFields),
   requestItems: many(requestItems),
 }));

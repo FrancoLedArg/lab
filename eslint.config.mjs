@@ -10,6 +10,7 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "react/no-children-prop": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   // Override default ignores of eslint-config-next.

@@ -6,7 +6,7 @@ import {
   pgEnum,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import { medicalRequests, labPractice } from "@/lib/db/schema/";
+import { medicalRequests, labPractices } from "@/lib/db/schema/index";
 
 /*
 La entidad "Request Item" es una entidad intermedia con identidad propia.
@@ -59,7 +59,7 @@ export const requestItems = pgTable(
       .references(() => medicalRequests.id, { onDelete: "restrict" })
       .notNull(),
     labPracticeId: integer("lab_practice_id")
-      .references(() => labPractice.id, {
+      .references(() => labPractices.id, {
         onDelete: "restrict",
       })
       .notNull(),

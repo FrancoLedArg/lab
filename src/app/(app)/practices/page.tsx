@@ -24,20 +24,24 @@ import {
 // Components
 import { DataTable } from "@/components/data-table/data-table";
 import { columns } from "@/components/data-table/columns";
+import NewPracticeButton from "@/components/practices-data-table/new-practice-button";
 
 export default async function PracticesPage() {
-  const practices = await db.query.labPractice.findMany();
+  const practices = await db.query.labPractices.findMany();
 
   return (
     <main className="w-full h-full p-6 flex flex-col gap-6">
-      <div>
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">Prácticas</h1>
-        <p className="text-muted-foreground mt-2">
-          Catálogo de prácticas bioquímicas disponibles
-        </p>
+
+        <div className="flex justify-end">
+          <NewPracticeButton />
+        </div>
       </div>
 
-      <DataTable columns={columns} data={practices} />
+      <div className="w-full">
+        <DataTable columns={columns} data={practices} />
+      </div>
     </main>
   );
 }

@@ -1,6 +1,5 @@
 // Drizzle
 import {
-  decimal,
   integer,
   pgEnum,
   pgTable,
@@ -11,7 +10,7 @@ import {
 import { relations } from "drizzle-orm";
 
 // Schemas
-import { labPractice, fieldResults } from "@/lib/db/schema/index";
+import { labPractices, fieldResults } from "@/lib/db/schema/index";
 
 export const dataTypeEnum = pgEnum("data_type", [
   "TEXT",
@@ -22,14 +21,12 @@ export const dataTypeEnum = pgEnum("data_type", [
 
 export const labPracticeFields = pgTable("lab_practice_fields", {
   id: serial("id").primaryKey(),
-  labPracticeId: integer("lab_practice_id").references(() => labPractice.id, {
+  labPracticeId: integer("lab_practice_id").references(() => labPractices.id, {
     onDelete: "restrict",
   }),
   name: text("name").notNull(),
-  dataType: dataTypeEnum("data_type").notNull(),
+  dataType: dataTypeEnum("data_type").notNull().default("TEXT"),
   unit: text("unit").notNull(),
-  minRange: decimal("min_range").notNull(),
-  maxRange: decimal("max_range").notNull(),
   hierarchy: integer("hierarchy").notNull(),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
@@ -42,9 +39,9 @@ export const labPracticeFields = pgTable("lab_practice_fields", {
 export const labPracticeFieldsRelations = relations(
   labPracticeFields,
   ({ one }) => ({
-    labPractice: one(labPractice, {
+    labPractice: one(labPractices, {
       fields: [labPracticeFields.labPracticeId],
-      references: [labPractice.id],
+      references: [labPractices.id],
     }),
     fieldResults: one(fieldResults, {
       fields: [labPracticeFields.id],
