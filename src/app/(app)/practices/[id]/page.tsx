@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/item";
 
 // Components
-import CreateFieldButton from "@/components/practice-fields/create-field-button";
 import Sortable from "@/components/sortable";
 import Draggable from "@/components/draggable";
 import PracticeField from "@/components/practice-fields/practice-field";
@@ -49,19 +48,17 @@ export default async function Page({ params }: { params: { id: string } }) {
         <div className="w-full flex justify-between items-center gap-6">
           <p>Lista de Campos</p>
 
+          {/*
           <CreateFieldButton
             data={{ labPracticeId: Number(id), hierarchy: 0 }}
           />
+          */}
         </div>
 
         <Sortable data={practice.labPracticeFields}>
           {practice.labPracticeFields.map((field) => (
             <Draggable key={field.id} id={field.id}>
-              <PracticeField
-                name={field.name}
-                dataType={field.dataType}
-                unit={field.unit}
-              />
+              <PracticeField data={field} />
             </Draggable>
           ))}
         </Sortable>

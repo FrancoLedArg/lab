@@ -4,9 +4,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// Shadcn
-import { Item, ItemActions } from "@/components/ui/item";
-
 // Icons
 import { GripVertical } from "lucide-react";
 
@@ -26,19 +23,17 @@ export default function Draggable({
   };
 
   return (
-    <Item
-      variant="outline"
-      className="grid grid-cols-3"
+    <div
+      className="w-full flex gap-6 outline rounded-md p-6"
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
     >
-      <ItemActions>
-        <GripVertical />
-      </ItemActions>
+      <div className="flex items-center gap-2" {...listeners}>
+        <GripVertical size={24} />
+      </div>
 
       {children}
-    </Item>
+    </div>
   );
 }

@@ -40,8 +40,18 @@ export default function SafeActionButton<
     },
   });
 
+  const handleClick = () => {
+    console.log("clicked", input);
+    execute(input);
+  };
+
   return (
-    <Button onClick={() => execute(input)} disabled={isExecuting}>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={handleClick}
+      disabled={isExecuting}
+    >
       {isExecuting ? <Spinner /> : children}
     </Button>
   );
