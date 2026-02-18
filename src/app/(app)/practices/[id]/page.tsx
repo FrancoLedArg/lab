@@ -6,18 +6,8 @@ import { db } from "@/lib/db";
 import { labPractices, labPracticeFields } from "@/lib/db/schema/index";
 import { eq, asc } from "drizzle-orm";
 
-// Shadcn
-import {
-  ItemHeader,
-  ItemTitle,
-  ItemContent,
-  ItemDescription,
-} from "@/components/ui/item";
-
 // Components
-import Sortable from "@/components/sortable";
-import Draggable from "@/components/draggable";
-import PracticeField from "@/components/practice-fields/practice-field";
+import PracticeFieldsGroup from "@/components/practice-fields/practice-fields-group";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -44,25 +34,10 @@ export default async function Page({ params }: { params: { id: string } }) {
         <h1 className="text-3xl font-bold tracking-tight">{practice.name}</h1>
       </div>
 
-      <div className="flex flex-col gap-6">
-        <div className="w-full flex justify-between items-center gap-6">
-          <p>Lista de Campos</p>
-
-          {/*
-          <CreateFieldButton
-            data={{ labPracticeId: Number(id), hierarchy: 0 }}
-          />
-          */}
-        </div>
-
-        <Sortable data={practice.labPracticeFields}>
-          {practice.labPracticeFields.map((field) => (
-            <Draggable key={field.id} id={field.id}>
-              <PracticeField data={field} />
-            </Draggable>
-          ))}
-        </Sortable>
-      </div>
+      <PracticeFieldsGroup
+        labPracticeId={practice.id}
+        labPracticeFields={practice.labPracticeFields}
+      />
     </main>
   );
 }

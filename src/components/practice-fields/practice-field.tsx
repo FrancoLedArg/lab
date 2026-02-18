@@ -6,9 +6,14 @@ import { useRouter } from "next/navigation";
 // React
 import { useState } from "react";
 
+// Dnd
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 // Shadcn
 import {
   Item,
+  ItemActions,
   ItemTitle,
   ItemContent,
   ItemDescription,
@@ -19,20 +24,50 @@ import EditFieldForm, {
   type EditFieldFormField,
 } from "@/components/practice-fields/edit-field-form";
 
+// Icons
+import { GripVertical } from "lucide-react";
+
 export type PracticeFieldProps = EditFieldFormField;
 
-export default function PracticeField({ data }: { data: PracticeFieldProps }) {
+export default function PracticeField({
+  id,
+  data,
+}: {
+  id: number;
+  data: PracticeFieldProps;
+}) {
   const { name, dataType, unit } = data;
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
+  // Dnd
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
     <Item
-      className="w-full flex flex-row justify-between items-center"
+      variant="muted"
+      className="w-full flex flex-row justify-between items-center gap-6"
       onClick={() => !isEditing && setIsEditing(true)}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
     >
+      <ItemActions>
+        <GripVertical
+          size={16}
+          className="text-muted-foreground"
+          {...listeners}
+        />
+      </ItemActions>
+
       {isEditing ? (
-        <div className="w-full">
+        <ItemContent className="w-full">
           <EditFieldForm
             field={data}
             onSuccess={() => {
@@ -41,7 +76,7 @@ export default function PracticeField({ data }: { data: PracticeFieldProps }) {
             }}
             onCancel={() => setIsEditing(false)}
           />
-        </div>
+        </ItemContent>
       ) : (
         <ItemContent className="w-full flex flex-col gap-1">
           <ItemTitle className="text-lg">{name}</ItemTitle>

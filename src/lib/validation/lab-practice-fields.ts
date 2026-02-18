@@ -17,7 +17,8 @@ export const labPracticeFieldSchema = z.object({
     .int("El ID de la práctica de laboratorio debe ser un número entero.")
     .positive(
       "El ID de la práctica de laboratorio debe ser un número positivo.",
-    ),
+    )
+    .nullable(),
   name: z
     .string()
     .trim()
@@ -80,18 +81,6 @@ export const createLabPracticeFieldSchema = z.object({
     .transform((value) => Number(value)),
 });
 
-export const deleteLabPracticeFieldSchema = z.object({
-  id: z
-    .union([
-      z
-        .number()
-        .int("El ID del campo debe ser un número entero.")
-        .positive("El ID del campo debe ser un número positivo."),
-      numericIdFromStringSchema,
-    ])
-    .transform((value) => Number(value)),
-});
-
 export const updateLabPracticeFieldSchema = z.object({
   id: z
     .union([
@@ -107,6 +96,18 @@ export const updateLabPracticeFieldSchema = z.object({
   unit: labPracticeFieldSchema.shape.unit,
   hierarchy: z
     .union([labPracticeFieldSchema.shape.hierarchy, hierarchyFromStringSchema])
+    .transform((value) => Number(value)),
+});
+
+export const deleteLabPracticeFieldSchema = z.object({
+  id: z
+    .union([
+      z
+        .number()
+        .int("El ID del campo debe ser un número entero.")
+        .positive("El ID del campo debe ser un número positivo."),
+      numericIdFromStringSchema,
+    ])
     .transform((value) => Number(value)),
 });
 

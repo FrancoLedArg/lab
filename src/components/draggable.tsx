@@ -24,7 +24,7 @@ export default function Draggable({
 
   return (
     <div
-      className="w-full flex gap-6 outline rounded-md p-6"
+      className="w-full flex gap-6 rounded-md p-6 bg-muted/25"
       ref={setNodeRef}
       style={style}
       {...attributes}

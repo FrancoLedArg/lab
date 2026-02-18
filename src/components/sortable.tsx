@@ -63,28 +63,26 @@ export default function Sortable({
   };
 
   return (
-    <ItemGroup className="w-full h-full p-6 bg-muted/25 rounded-md gap-6">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={items} strategy={verticalListSortingStrategy}>
-          {data.length > 0 ? (
-            children
-          ) : (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <FlaskConicalOff />
-                </EmptyMedia>
-                <EmptyTitle>No hay items disponibles</EmptyTitle>
-                <EmptyDescription>Aun no creaste ningun item.</EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-        </SortableContext>
-      </DndContext>
-    </ItemGroup>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={items} strategy={verticalListSortingStrategy}>
+        {data.length > 0 ? (
+          children
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <FlaskConicalOff />
+              </EmptyMedia>
+              <EmptyTitle>No hay items disponibles</EmptyTitle>
+              <EmptyDescription>Aun no creaste ningun item.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
+      </SortableContext>
+    </DndContext>
   );
 }
