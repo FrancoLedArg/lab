@@ -34,6 +34,8 @@ export const updateFieldsHierarchy = actionClient
   .action(async ({ parsedInput }) => {
     const { id, labPracticeFieldIds } = parsedInput;
 
+    console.log("Server Action:", id, labPracticeFieldIds);
+
     const updateTransaction = db.transaction(async (tx) => {
       const existingLabPractice = await tx.query.labPractices.findFirst({
         where: eq(labPractices.id, id),

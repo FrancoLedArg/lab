@@ -1,8 +1,13 @@
 "use client";
 
+import type { ComponentProps } from "react";
+
 // Dnd
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+// Shadcn
+import { Item, ItemActions } from "@/components/ui/item";
 
 // Icons
 import { GripVertical } from "lucide-react";
@@ -10,10 +15,12 @@ import { GripVertical } from "lucide-react";
 export default function Draggable({
   id,
   children,
-}: {
-  id: number;
-  children: React.ReactNode;
-}) {
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  ...props
+}: ComponentProps<typeof Item> & { id: string | number }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
@@ -23,17 +30,21 @@ export default function Draggable({
   };
 
   return (
-    <div
-      className="w-full flex gap-6 rounded-md p-6 bg-muted/25"
+    <Item
       ref={setNodeRef}
       style={style}
+      className={className}
+      variant={variant}
+      size={size}
+      asChild={asChild}
       {...attributes}
+      {...props}
     >
-      <div className="flex items-center gap-2" {...listeners}>
-        <GripVertical size={24} />
-      </div>
+      <ItemActions>
+        <GripVertical size={24} {...listeners} />
+      </ItemActions>
 
       {children}
-    </div>
+    </Item>
   );
 }

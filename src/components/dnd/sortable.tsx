@@ -11,6 +11,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  UniqueIdentifier,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -19,29 +20,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
-// Shadcn
-import { ItemGroup } from "@/components/ui/item";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
-  EmptyMedia,
-} from "@/components/ui/empty";
-import { Button } from "@/components/ui/button";
-
-// Icons
-import { FlaskConicalOff } from "lucide-react";
-
 export default function Sortable({
-  data,
+  array,
   children,
 }: {
-  data: any[];
+  array: (UniqueIdentifier | { id: UniqueIdentifier })[];
   children: React.ReactNode;
 }) {
-  const [items, setItems] = useState(data.map((field) => field.id));
+  const [items, setItems] = useState(array);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -69,19 +55,7 @@ export default function Sortable({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        {data.length > 0 ? (
-          children
-        ) : (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <FlaskConicalOff />
-              </EmptyMedia>
-              <EmptyTitle>No hay items disponibles</EmptyTitle>
-              <EmptyDescription>Aun no creaste ningun item.</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
+        {children}
       </SortableContext>
     </DndContext>
   );
