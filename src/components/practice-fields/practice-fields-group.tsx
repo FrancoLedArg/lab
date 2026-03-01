@@ -1,10 +1,11 @@
 "use client";
 
-// Next
-import { useRouter } from "next/navigation";
-
 // React
-import { useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+
+// Dnd
+import { DragDropProvider } from "@dnd-kit/react";
+import { move } from "@dnd-kit/helpers";
 
 // Hooks
 import { useDebouncedCallback } from "@/hooks/use-debounce";
@@ -33,12 +34,12 @@ export default function PracticeFieldsGroup({
   labPracticeId: number;
   labPracticeFields: LabPracticeField[];
 }) {
+  const [items, setItems] = useState(labPracticeFields);
+
   const pendingPayloadRef = useRef<{
     id: number;
     labPracticeFieldIds: { id: number }[];
   } | null>(null);
-
-  const router = useRouter();
 
   const { execute } = useAction(updateFieldsHierarchy, {
     onSuccess: () => {
@@ -51,14 +52,12 @@ export default function PracticeFieldsGroup({
     },
   });
 
-  const DEBOUNCE_MS = 400;
-
   const [debouncedSave, cancelDebounce] = useDebouncedCallback(
     (payload: { id: number; labPracticeFieldIds: { id: number }[] }) => {
       execute(payload);
       pendingPayloadRef.current = null;
     },
-    DEBOUNCE_MS,
+    200,
   );
 
   const flushPendingSave = () => {
@@ -75,11 +74,26 @@ export default function PracticeFieldsGroup({
 
   return (
     <ItemGroup className="flex flex-col justify-center items-center gap-6">
-      <Sortable array={labPracticeFields.map((field) => field.id)}>
-        {labPracticeFields.map((field) => (
-          <PracticeField key={field.id} id={field.id} data={field} />
+      <DragDropProvider
+        onDragEnd={(event) => {
+          const newArray = move(items, event);
+
+          setItems(newArray);
+          const payload = {
+            id: labPracticeId,
+            labPracticeFieldIds: newArray.map((field) => ({
+              id: field.id,
+            })),
+          };
+          debouncedSave(payload);
+        }}
+      >
+        {labPracticeFields.map((field, index) => (
+          <Sortable key={field.id} id={field.id} index={index}>
+            <PracticeField field={field} />
+          </Sortable>
         ))}
-      </Sortable>
+      </DragDropProvider>
 
       <SafeActionButton
         safeAction={createLabPracticeField}

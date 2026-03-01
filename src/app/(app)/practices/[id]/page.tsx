@@ -17,6 +17,9 @@ export default async function Page({ params }: { params: { id: string } }) {
     with: {
       labPracticeFields: {
         orderBy: [asc(labPracticeFields.hierarchy)],
+        with: {
+          referenceValues: true,
+        },
       },
     },
   });

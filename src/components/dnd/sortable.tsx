@@ -1,62 +1,45 @@
 "use client";
 
 // React
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 // Dnd
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  UniqueIdentifier,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/react/sortable";
+
+// Shadcn
+import { Item, ItemActions } from "@/components/ui/item";
+import { Button } from "@/components/ui/button";
+
+// Icons
+import { GripVertical } from "lucide-react";
 
 export default function Sortable({
-  array,
+  id,
+  index,
   children,
 }: {
-  array: (UniqueIdentifier | { id: UniqueIdentifier })[];
+  id: number;
+  index: number;
   children: React.ReactNode;
 }) {
-  const [items, setItems] = useState(array);
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  const handleDragEnd = (e: any) => {
-    const { active, over } = e;
-
-    if (active.id !== over.id) {
-      setItems((items) => {
-        const oldIndex = items.indexOf(active.id);
-        const newIndex = items.indexOf(over.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
+  const [element, setElement] = useState<Element | null>(null);
+  const handleRef = useRef<HTMLButtonElement | null>(null);
+  const { isDragging } = useSortable({ id, index, element, handle: handleRef });
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
+    <Item
+      ref={setElement}
+      variant="muted"
+      className="w-full grid grid-cols-[auto_1fr_auto] items-start gap-4"
+      data-shadow={isDragging || undefined}
     >
-      <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        {children}
-      </SortableContext>
-    </DndContext>
+      <ItemActions>
+        <Button variant="ghost" size="icon" ref={handleRef}>
+          <GripVertical />
+        </Button>
+      </ItemActions>
+
+      {children}
+    </Item>
   );
 }

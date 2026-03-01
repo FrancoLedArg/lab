@@ -10,14 +10,14 @@ import { labPracticeFields } from "@/lib/db/schema/index";
 
 // Validation Schemas
 import {
-  createLabPracticeFieldSchema as createSchema,
-  updateLabPracticeFieldSchema as updateSchema,
-  deleteLabPracticeFieldSchema as deleteSchema,
+  selectSchema,
+  insertSchema,
+  updateSchema,
 } from "@/lib/validation/lab-practice-fields";
 
 export const createLabPracticeField = actionClient
   .metadata({ actionName: "createLabPracticeField" })
-  .inputSchema(createSchema, {
+  .inputSchema(insertSchema, {
     handleValidationErrorsShape: async (errors) => {
       return flattenValidationErrors(errors).fieldErrors;
     },
@@ -73,7 +73,7 @@ export const updateLabPracticeField = actionClient
 
 export const deleteLabPracticeField = actionClient
   .metadata({ actionName: "deleteLabPracticeField" })
-  .inputSchema(deleteSchema, {
+  .inputSchema(selectSchema, {
     handleValidationErrorsShape: async (errors) => {
       return flattenValidationErrors(errors).fieldErrors;
     },

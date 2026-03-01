@@ -1,11 +1,8 @@
-import z from "zod";
+// Zod
+import { z } from "zod";
 
-export const dataTypeSchema = z.enum([
-  "TEXT",
-  "NUMBER",
-  "BOOLEAN",
-  "CALCULATED",
-]);
+// Validation Schemas
+import { referenceValuesSchema } from "@/lib/validation/reference-values";
 
 export const labPracticeFieldSchema = z.object({
   id: z
@@ -17,14 +14,13 @@ export const labPracticeFieldSchema = z.object({
     .int("El ID de la práctica de laboratorio debe ser un número entero.")
     .positive(
       "El ID de la práctica de laboratorio debe ser un número positivo.",
-    )
-    .nullable(),
+    ),
   name: z
     .string()
     .trim()
     .min(1, "El nombre del campo no puede estar vacío.")
     .max(255, "El nombre del campo no puede superar los 255 caracteres."),
-  dataType: dataTypeSchema,
+  dataType: z.enum(["TEXT", "NUMBER", "BOOLEAN", "CALCULATED"]),
   unit: z
     .string()
     .trim()
@@ -33,91 +29,28 @@ export const labPracticeFieldSchema = z.object({
   hierarchy: z
     .number()
     .int("La jerarquía debe ser un número entero.")
-    .nonnegative("La jerarquía no puede ser negativa.")
-    .max(9999, "La jerarquía no puede ser mayor que 9999."),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+    .positive("La jerarquía debe ser un número positivo."),
+  createdAt: z.date("La fecha de creación debe ser una fecha."),
+  updatedAt: z.date("La fecha de actualización debe ser una fecha."),
+  referenceValues: z.array(referenceValuesSchema),
 });
 
-const numericIdFromStringSchema = z
-  .string()
-  .trim()
-  .regex(/^\d+$/, "El valor debe ser un número entero positivo.")
-  .transform((value) => Number(value));
-
-const hierarchyFromStringSchema = z
-  .string()
-  .trim()
-  .regex(/^\d+$/, "La jerarquía debe ser un número entero.")
-  .transform((value) => Number(value))
-  .refine((value) => value >= 0, {
-    message: "La jerarquía no puede ser negativa.",
-  })
-  .refine((value) => value <= 9999, {
-    message: "La jerarquía no puede ser mayor que 9999.",
-  });
-
-export const createLabPracticeFieldSchema = z.object({
-  labPracticeId: z
-    .union([
-      z
-        .number()
-        .int("El ID de la práctica de laboratorio debe ser un número entero.")
-        .positive(
-          "El ID de la práctica de laboratorio debe ser un número positivo.",
-        ),
-      numericIdFromStringSchema,
-    ])
-    .transform((value) => Number(value)),
-  hierarchy: z
-    .union([
-      z
-        .number()
-        .int("La jerarquía debe ser un número entero.")
-        .nonnegative("La jerarquía no puede ser negativa.")
-        .max(9999, "La jerarquía no puede ser mayor que 9999."),
-      hierarchyFromStringSchema,
-    ])
-    .transform((value) => Number(value)),
+export const selectSchema = labPracticeFieldSchema.pick({
+  id: true,
 });
-
-export const updateLabPracticeFieldSchema = z.object({
-  id: z
-    .union([
-      z
-        .number()
-        .int("El ID del campo debe ser un número entero.")
-        .positive("El ID del campo debe ser un número positivo."),
-      numericIdFromStringSchema,
-    ])
-    .transform((value) => Number(value)),
-  name: labPracticeFieldSchema.shape.name,
-  dataType: dataTypeSchema,
-  unit: labPracticeFieldSchema.shape.unit,
-  hierarchy: z
-    .union([labPracticeFieldSchema.shape.hierarchy, hierarchyFromStringSchema])
-    .transform((value) => Number(value)),
+export const insertSchema = labPracticeFieldSchema.pick({
+  labPracticeId: true,
+  hierarchy: true,
 });
-
-export const deleteLabPracticeFieldSchema = z.object({
-  id: z
-    .union([
-      z
-        .number()
-        .int("El ID del campo debe ser un número entero.")
-        .positive("El ID del campo debe ser un número positivo."),
-      numericIdFromStringSchema,
-    ])
-    .transform((value) => Number(value)),
+export const updateSchema = labPracticeFieldSchema.partial({
+  labPracticeId: true,
+  name: true,
+  dataType: true,
+  unit: true,
+  hierarchy: true,
 });
 
 export type LabPracticeField = z.infer<typeof labPracticeFieldSchema>;
-export type CreateLabPracticeFieldInput = z.infer<
-  typeof createLabPracticeFieldSchema
->;
-export type DeleteLabPracticeFieldInput = z.infer<
-  typeof deleteLabPracticeFieldSchema
->;
-export type UpdateLabPracticeFieldInput = z.infer<
-  typeof updateLabPracticeFieldSchema
->;
+export type SelectLabPracticeField = z.infer<typeof selectSchema>;
+export type InsertLabPracticeField = z.infer<typeof insertSchema>;
+export type UpdateLabPracticeField = z.infer<typeof updateSchema>;
