@@ -7,14 +7,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 // React Hook Form
-import {
-  Controller,
-  FormProvider,
-  useForm,
-  type Resolver,
-} from "react-hook-form";
+import { FormProvider, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { get } from "react-hook-form";
 
 // Next Safe Action
 import { useAction } from "next-safe-action/hooks";
@@ -42,19 +36,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  FieldGroup,
-  Field,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -63,12 +45,14 @@ import { Pencil, Trash } from "lucide-react";
 
 // Components
 import TextField from "@/components/form/text-field";
+import SelectField from "@/components/form/select-field";
 import SubmitButton from "@/components/form/submit-button";
+import ReferenceValuesGroup from "./reference-values-group";
 
 export default function PracticeField({ field }: { field: LabPracticeField }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { name, dataType, unit } = field;
+  const { name, dataType, unit, referenceValues } = field;
 
   const router = useRouter();
 
@@ -92,14 +76,11 @@ export default function PracticeField({ field }: { field: LabPracticeField }) {
       dataType: field.dataType,
       unit: field.unit,
       hierarchy: field.hierarchy,
+      referenceValues: field.referenceValues,
     },
   });
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = methods;
+  const { handleSubmit } = methods;
 
   const onSubmit = (data: FormSchema) => {
     execute(data);
@@ -139,51 +120,28 @@ export default function PracticeField({ field }: { field: LabPracticeField }) {
           <form
             onSubmit={handleSubmit(onSubmit)}
             onClick={(e) => e.stopPropagation()}
-            className="w-full"
+            className="w-full flex flex-col gap-4"
           >
             <FieldGroup className="gap-3">
               <TextField name="name" label="Nombre" />
-              <Controller
+              <SelectField
                 name="dataType"
-                control={control}
-                render={({ field: selectField }) => (
-                  <Field>
-                    <FieldLabel htmlFor="dataType">Tipo de dato</FieldLabel>
-                    <Select
-                      value={selectField.value}
-                      onValueChange={selectField.onChange}
-                    >
-                      <SelectTrigger id="dataType" className="w-full">
-                        <SelectValue placeholder="Seleccionar tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {/*DATA_TYPE_OPTIONS.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))*/}
-                      </SelectContent>
-                    </Select>
-                    {get(errors, "dataType")?.message && (
-                      <FieldError
-                        errors={[
-                          {
-                            message: get(errors, "dataType")?.message as string,
-                          },
-                        ]}
-                      />
-                    )}
-                  </Field>
-                )}
+                label="Tipo de dato"
+                options={["TEXT", "NUMBER", "BOOLEAN", "CALCULATED"]}
               />
               <TextField name="unit" label="Unidad" />
-              <div className="flex gap-2 pt-1">
-                <SubmitButton label="Guardar" isExecuting={isExecuting} />
-                <Button type="button" variant="outline" disabled={isExecuting}>
-                  Cancelar
-                </Button>
-              </div>
             </FieldGroup>
+
+            <Separator />
+
+            <ReferenceValuesGroup fieldId={field.id} values={referenceValues} />
+
+            <div className="flex gap-2 pt-1">
+              <SubmitButton label="Guardar" isExecuting={isExecuting} />
+              <Button type="button" variant="outline" disabled={isExecuting}>
+                Cancelar
+              </Button>
+            </div>
           </form>
         </FormProvider>
       </CollapsibleContent>
