@@ -4,15 +4,18 @@ import { useFormContext } from "react-hook-form";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { get } from "react-hook-form";
+import { cn } from "@/lib/utils";
 
 export default function TextField({
   name,
   label,
   disabled,
+  className,
 }: {
   name: string;
   label: string;
   disabled?: boolean;
+  className?: string;
 }) {
   const {
     register,
@@ -23,7 +26,7 @@ export default function TextField({
   const error = get(errors, name)?.message as string | undefined;
 
   return (
-    <Field>
+    <Field className={cn(className)}>
       <FieldLabel htmlFor={label}>{label}</FieldLabel>
       <Input
         type="text"

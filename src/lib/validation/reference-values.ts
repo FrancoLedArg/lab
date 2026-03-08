@@ -40,11 +40,18 @@ export const insertSchema = referenceValuesSchema.pick({
   labPracticeFieldId: true,
 });
 
-export const updateSchema = referenceValuesSchema.partial({
-  name: true,
-  minRange: true,
-  maxRange: true,
-});
+export const updateSchema = referenceValuesSchema
+  .pick({
+    id: true,
+    name: true,
+    minRange: true,
+    maxRange: true,
+  })
+  .partial({
+    name: true,
+    minRange: true,
+    maxRange: true,
+  });
 
 export type ReferenceValues = z.infer<typeof referenceValuesSchema>;
 export type InsertReferenceValues = z.infer<typeof insertSchema>;

@@ -2,7 +2,10 @@
 import { z } from "zod";
 
 // Validation Schemas
-import { referenceValuesSchema } from "@/lib/validation/reference-values";
+import {
+  referenceValuesSchema,
+  updateSchema as updateReferenceValuesSchema,
+} from "@/lib/validation/reference-values";
 
 export const labPracticeFieldSchema = z.object({
   id: z
@@ -42,13 +45,19 @@ export const insertSchema = labPracticeFieldSchema.pick({
   labPracticeId: true,
   hierarchy: true,
 });
-export const updateSchema = labPracticeFieldSchema.partial({
-  labPracticeId: true,
-  name: true,
-  dataType: true,
-  unit: true,
-  hierarchy: true,
-});
+export const updateSchema = labPracticeFieldSchema
+  .pick({
+    id: true,
+    labPracticeId: true,
+    name: true,
+    dataType: true,
+    unit: true,
+    hierarchy: true,
+  })
+  .partial()
+  .extend({
+    referenceValues: z.array(updateReferenceValuesSchema),
+  });
 
 export type LabPracticeField = z.infer<typeof labPracticeFieldSchema>;
 export type SelectLabPracticeField = z.infer<typeof selectSchema>;

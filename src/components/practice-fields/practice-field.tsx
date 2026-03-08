@@ -7,7 +7,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 // React Hook Form
-import { FormProvider, useForm, type Resolver } from "react-hook-form";
+import {
+  FormProvider,
+  useForm,
+  type Resolver,
+  type FieldErrors,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Next Safe Action
@@ -52,7 +57,7 @@ import ReferenceValuesGroup from "./reference-values-group";
 export default function PracticeField({ field }: { field: LabPracticeField }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { name, dataType, unit, referenceValues } = field;
+  const { name, dataType, unit } = field;
 
   const router = useRouter();
 
@@ -75,15 +80,20 @@ export default function PracticeField({ field }: { field: LabPracticeField }) {
       name: field.name,
       dataType: field.dataType,
       unit: field.unit,
-      hierarchy: field.hierarchy,
       referenceValues: field.referenceValues,
     },
   });
 
   const { handleSubmit } = methods;
 
-  const onSubmit = (data: FormSchema) => {
-    execute(data);
+  const onValid = (data: FormSchema) => {
+    console.log(data);
+
+    // execute(data);
+  };
+
+  const onInvalid = (errors: FieldErrors<FormSchema>) => {
+    console.log(errors);
   };
 
   return (
@@ -118,7 +128,7 @@ export default function PracticeField({ field }: { field: LabPracticeField }) {
 
         <FormProvider {...methods}>
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onValid, onInvalid)}
             onClick={(e) => e.stopPropagation()}
             className="w-full flex flex-col gap-4"
           >
@@ -134,7 +144,7 @@ export default function PracticeField({ field }: { field: LabPracticeField }) {
 
             <Separator />
 
-            <ReferenceValuesGroup fieldId={field.id} values={referenceValues} />
+            <ReferenceValuesGroup />
 
             <div className="flex gap-2 pt-1">
               <SubmitButton label="Guardar" isExecuting={isExecuting} />

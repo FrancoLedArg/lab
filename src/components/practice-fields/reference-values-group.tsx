@@ -1,36 +1,24 @@
-// Next Safe Action
-import { useAction } from "next-safe-action/hooks";
-import { createReferenceValues } from "@/actions/reference-values";
+"use client";
+
+// React Hook Form
+import { useFormContext, useFieldArray } from "react-hook-form";
 
 // Shadcn
 import { FieldSet, FieldLegend, FieldGroup } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
+import { Empty } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 // Icons
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 
 // Components
-import ReferenceValues from "./reference-values";
+import TextField from "@/components/form/text-field";
 
-// Types
-import type { ReferenceValues as ReferenceValuesType } from "@/lib/validation/reference-values";
-
-export default function ReferenceValuesGroup({
-  fieldId,
-  values,
-}: {
-  fieldId: number;
-  values: ReferenceValuesType[];
-}) {
-  const { execute, isExecuting } = useAction(createReferenceValues, {
-    onSuccess: ({ data }) => {},
-    onError: ({ error }) => {
-      toast.error("Error al actualizar los valores de referencia.", {
-        description: error.serverError as string,
-      });
-    },
+export default function ReferenceValuesGroup() {
+  const { control } = useFormContext();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "referenceValues",
   });
 
   return (
@@ -39,19 +27,41 @@ export default function ReferenceValuesGroup({
         <FieldLegend>Valores de referencia</FieldLegend>
         <Button
           variant="outline"
-          onClick={() => execute({ labPracticeFieldId: fieldId })}
-          disabled={isExecuting}
+          onClick={() => append({ name: "Nombre", minRange: 1, maxRange: 10 })}
         >
-          {isExecuting ? (
-            <Spinner />
-          ) : (
-            <>
-              <Plus /> Agregar
-            </>
-          )}
+          <Plus /> Agregar
         </Button>
       </FieldGroup>
-      <FieldGroup></FieldGroup>
+
+      <FieldSet>
+        {fields.length === 0 ? (
+          <Empty>Hello World</Empty>
+        ) : (
+          fields.map((field, index) => (
+            <FieldGroup
+              key={field.id}
+              className="grid grid-cols-2 md:grid-cols-3 gap-2"
+            >
+              <TextField
+                name={`referenceValues.${index}.name`}
+                label="Nombre"
+                className="col-span-1 md:col-span-2"
+              />
+              <TextField
+                name={`referenceValues.${index}.minRange`}
+                label="Rango mínimo"
+              />
+              <TextField
+                name={`referenceValues.${index}.maxRange`}
+                label="Rango máximo"
+              />
+              <Button variant="ghost" size="icon" onClick={() => remove(index)}>
+                <Trash />
+              </Button>
+            </FieldGroup>
+          ))
+        )}
+      </FieldSet>
     </FieldSet>
   );
 }
