@@ -23,7 +23,6 @@ import { ItemGroup } from "@/components/ui/item";
 import { toast } from "sonner";
 
 // Components
-import Sortable from "@/components/dnd/sortable";
 import PracticeField from "@/components/practice-fields/practice-field";
 import SafeActionButton from "../safe-action-button";
 
@@ -89,9 +88,12 @@ export default function PracticeFieldsGroup({
         }}
       >
         {labPracticeFields.map((field, index) => (
-          <Sortable key={field.id} id={field.id} index={index}>
-            <PracticeField field={field} />
-          </Sortable>
+          <PracticeField
+            key={field.id}
+            id={field.id}
+            index={index}
+            field={field}
+          />
         ))}
       </DragDropProvider>
 

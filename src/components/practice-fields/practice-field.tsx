@@ -1,160 +1,99 @@
 "use client";
 
-// Next
-import { useRouter } from "next/navigation";
-
 // React
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-// React Hook Form
-import {
-  FormProvider,
-  useForm,
-  type Resolver,
-  type FieldErrors,
-} from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Next Safe Action
-import { useAction } from "next-safe-action/hooks";
-import { updateLabPracticeField } from "@/actions/lab-practice-fields";
-
-// Validation Schemas
-import { updateSchema as schema } from "@/lib/validation/lab-practice-fields";
+// Dnd
+import { useSortable } from "@dnd-kit/react/sortable";
 
 // Types
-import type {
-  LabPracticeField,
-  UpdateLabPracticeField as FormSchema,
-} from "@/lib/validation/lab-practice-fields";
+import type { LabPracticeField } from "@/lib/validation/lab-practice-fields";
 
 // Shadcn
 import {
+  Item,
+  ItemHeader,
   ItemActions,
   ItemTitle,
   ItemContent,
   ItemDescription,
 } from "@/components/ui/item";
-import { Separator } from "@/components/ui/separator";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
 
 // Icons
-import { Pencil, Trash } from "lucide-react";
+import { GripVertical, Pencil, Trash } from "lucide-react";
 
 // Components
-import TextField from "@/components/form/text-field";
-import SelectField from "@/components/form/select-field";
-import SubmitButton from "@/components/form/submit-button";
-import ReferenceValuesGroup from "./reference-values-group";
+import PracticeFieldForm from "./practice-field-form";
 
-export default function PracticeField({ field }: { field: LabPracticeField }) {
+export default function PracticeField({
+  id,
+  index,
+  field,
+}: {
+  id: number;
+  index: number;
+  field: LabPracticeField;
+}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [element, setElement] = useState<Element | null>(null);
+  const handleRef = useRef<HTMLButtonElement | null>(null);
+
+  const { isDragging } = useSortable({
+    id,
+    index,
+    element,
+    handle: handleRef,
+  });
 
   const { name, dataType, unit } = field;
 
-  const router = useRouter();
-
-  const { execute, isExecuting } = useAction(updateLabPracticeField, {
-    onSuccess: ({ data }) => {
-      toast.success("Campo actualizado.");
-      router.refresh();
-    },
-    onError: ({ error }) => {
-      toast.error("Error al actualizar el campo.", {
-        description: error.serverError as string,
-      });
-    },
-  });
-
-  const methods = useForm<FormSchema>({
-    resolver: zodResolver(schema) as Resolver<FormSchema>,
-    defaultValues: {
-      id: field.id,
-      name: field.name,
-      dataType: field.dataType,
-      unit: field.unit,
-      referenceValues: field.referenceValues,
-    },
-  });
-
-  const { handleSubmit } = methods;
-
-  const onValid = (data: FormSchema) => {
-    console.log(data);
-
-    // execute(data);
-  };
-
-  const onInvalid = (errors: FieldErrors<FormSchema>) => {
-    console.log(errors);
-  };
-
   return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      className="w-full flex flex-col gap-4"
+    <Item
+      ref={setElement}
+      variant="muted"
+      className="w-full grid grid-cols-[auto_1fr_auto] items-start gap-4"
+      data-shadow={isDragging || undefined}
     >
-      <div className="w-full flex flex-row justify-between items-center gap-6">
-        <ItemContent>
-          <ItemTitle>{name}</ItemTitle>
-          <ItemDescription>
-            {dataType} - {unit}
-          </ItemDescription>
-        </ItemContent>
-
-        <ItemActions>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Pencil />
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full flex flex-col gap-4 col-span-full">
+        <ItemHeader className="w-full flex flex-row justify-between items-center gap-6">
+          <ItemActions>
+            <Button variant="ghost" size="icon" ref={handleRef}>
+              <GripVertical />
             </Button>
-          </CollapsibleTrigger>
+          </ItemActions>
 
-          <Button variant="ghost" size="icon">
-            <Trash />
-          </Button>
-        </ItemActions>
-      </div>
+          <ItemContent>
+            <ItemTitle>{name}</ItemTitle>
+            <ItemDescription>
+              {dataType} - {unit}
+            </ItemDescription>
+          </ItemContent>
 
-      <CollapsibleContent className="w-full flex flex-col gap-4">
-        <Separator />
-
-        <FormProvider {...methods}>
-          <form
-            onSubmit={handleSubmit(onValid, onInvalid)}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full flex flex-col gap-4"
-          >
-            <FieldGroup className="gap-3">
-              <TextField name="name" label="Nombre" />
-              <SelectField
-                name="dataType"
-                label="Tipo de dato"
-                options={["TEXT", "NUMBER", "BOOLEAN", "CALCULATED"]}
-              />
-              <TextField name="unit" label="Unidad" />
-            </FieldGroup>
-
-            <Separator />
-
-            <ReferenceValuesGroup />
-
-            <div className="flex gap-2 pt-1">
-              <SubmitButton label="Guardar" isExecuting={isExecuting} />
-              <Button type="button" variant="outline" disabled={isExecuting}>
-                Cancelar
+          <ItemActions>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Pencil />
               </Button>
-            </div>
-          </form>
-        </FormProvider>
-      </CollapsibleContent>
-    </Collapsible>
+            </CollapsibleTrigger>
+
+            <Button variant="ghost" size="icon">
+              <Trash />
+            </Button>
+          </ItemActions>
+        </ItemHeader>
+
+        <CollapsibleContent className="w-full flex flex-col gap-4">
+          <Separator />
+          <PracticeFieldForm field={field} />
+        </CollapsibleContent>
+      </Collapsible>
+    </Item>
   );
 }
