@@ -14,6 +14,7 @@ import {
   labPractices,
   fieldResults,
   referenceValues,
+  shortcuts,
 } from "@/lib/db/schema/index";
 
 export const dataTypeEnum = pgEnum("data_type", [
@@ -52,5 +53,6 @@ export const labPracticeFieldsRelations = relations(
       references: [fieldResults.labPracticeFieldId],
     }),
     referenceValues: many(referenceValues),
+    shortcuts: many(shortcuts),
   }),
 );

@@ -24,10 +24,16 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 
 // Icons
-import { GripVertical, Pencil, Trash } from "lucide-react";
+import { Ellipsis, GripVertical, Pencil, Trash } from "lucide-react";
 
 // Components
 import PracticeFieldForm from "./practice-field-form";
@@ -61,8 +67,12 @@ export default function PracticeField({
       className="w-full grid grid-cols-[auto_1fr_auto] items-start gap-4"
       data-shadow={isDragging || undefined}
     >
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full flex flex-col gap-4 col-span-full">
-        <ItemHeader className="w-full flex flex-row justify-between items-center gap-6">
+      <Collapsible
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        className="w-full flex flex-col gap-4 col-span-full"
+      >
+        <ItemHeader className="w-full flex flex-row justify-between items-center gap-4">
           <ItemActions>
             <Button variant="ghost" size="icon" ref={handleRef}>
               <GripVertical />
@@ -77,15 +87,25 @@ export default function PracticeField({
           </ItemContent>
 
           <ItemActions>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Pencil />
-              </Button>
-            </CollapsibleTrigger>
-
-            <Button variant="ghost" size="icon">
-              <Trash />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Ellipsis />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <CollapsibleTrigger asChild>
+                  <DropdownMenuItem>
+                    <Pencil />
+                    Editar
+                  </DropdownMenuItem>
+                </CollapsibleTrigger>
+                <DropdownMenuItem variant="destructive">
+                  <Trash />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </ItemActions>
         </ItemHeader>
 
