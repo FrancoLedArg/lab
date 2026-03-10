@@ -36,8 +36,13 @@ import TextField from "@/components/form/text-field";
 import SelectField from "@/components/form/select-field";
 import SubmitButton from "@/components/form/submit-button";
 import ReferenceValuesGroup from "./reference-values-group";
+import ShortcutsGroup from "./shortcuts-group";
 
-export default function PracticeFieldForm({ field }: { field: LabPracticeField }) {
+export default function PracticeFieldForm({
+  field,
+}: {
+  field: LabPracticeField;
+}) {
   const router = useRouter();
 
   const { execute, isExecuting } = useAction(updateLabPracticeField, {
@@ -60,6 +65,7 @@ export default function PracticeFieldForm({ field }: { field: LabPracticeField }
       dataType: field.dataType,
       unit: field.unit,
       referenceValues: field.referenceValues,
+      shortcuts: field.shortcuts,
     },
   });
 
@@ -93,6 +99,10 @@ export default function PracticeFieldForm({ field }: { field: LabPracticeField }
         <Separator />
 
         <ReferenceValuesGroup />
+
+        <Separator />
+
+        <ShortcutsGroup />
 
         <div className="flex gap-2 pt-1">
           <SubmitButton label="Guardar" isExecuting={isExecuting} />

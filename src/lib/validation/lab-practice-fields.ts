@@ -6,6 +6,10 @@ import {
   referenceValuesSchema,
   updateSchema as updateReferenceValuesSchema,
 } from "@/lib/validation/reference-values";
+import {
+  shortcutsSchema,
+  updateSchema as updateShortcutsSchema,
+} from "@/lib/validation/shortcuts";
 
 export const labPracticeFieldSchema = z.object({
   id: z
@@ -36,6 +40,7 @@ export const labPracticeFieldSchema = z.object({
   createdAt: z.date("La fecha de creación debe ser una fecha."),
   updatedAt: z.date("La fecha de actualización debe ser una fecha."),
   referenceValues: z.array(referenceValuesSchema),
+  shortcuts: z.array(shortcutsSchema),
 });
 
 export const selectSchema = labPracticeFieldSchema.pick({
@@ -57,6 +62,7 @@ export const updateSchema = labPracticeFieldSchema
   .partial()
   .extend({
     referenceValues: z.array(updateReferenceValuesSchema),
+    shortcuts: z.array(updateShortcutsSchema),
   });
 
 export type LabPracticeField = z.infer<typeof labPracticeFieldSchema>;
