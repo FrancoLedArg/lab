@@ -72,11 +72,12 @@ export default function PracticeFieldForm({
   const { handleSubmit } = methods;
 
   const onValid = (data: FormSchema) => {
-    execute(data);
+    // execute(data);
+    console.log(data);
   };
 
   const onInvalid = (errors: FieldErrors<FormSchema>) => {
-    void errors;
+    console.error(errors);
   };
 
   return (

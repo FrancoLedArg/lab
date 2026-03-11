@@ -13,6 +13,7 @@ import { Plus, Trash } from "lucide-react";
 
 // Components
 import TextField from "@/components/form/text-field";
+import NumberField from "@/components/form/number-field";
 
 export default function ReferenceValuesGroup() {
   const { control } = useFormContext();
@@ -47,11 +48,11 @@ export default function ReferenceValuesGroup() {
                 label="Nombre"
                 className="col-span-1 md:col-span-2"
               />
-              <TextField
+              <NumberField
                 name={`referenceValues.${index}.minRange`}
                 label="Rango mínimo"
               />
-              <TextField
+              <NumberField
                 name={`referenceValues.${index}.maxRange`}
                 label="Rango máximo"
               />

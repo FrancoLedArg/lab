@@ -23,12 +23,11 @@ export const referenceValuesSchema = z.object({
   minRange: z
     .number()
     .int("El rango mínimo debe ser un número entero.")
-    .positive("El rango mínimo debe ser un número positivo."),
+    .nullable(),
   maxRange: z
     .number()
     .int("El rango máximo debe ser un número entero.")
-    .positive("El rango máximo debe ser un número positivo."),
-  createdAt: z.date("La fecha de creación debe ser una fecha."),
+    .nullable(),
   updatedAt: z.date("La fecha de actualización debe ser una fecha."),
 });
 

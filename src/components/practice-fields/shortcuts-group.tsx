@@ -24,7 +24,7 @@ export default function ShortcutsGroup() {
   return (
     <FieldSet>
       <FieldGroup className="flex flex-row justify-between items-center">
-        <FieldLegend>Atajos</FieldLegend>
+        <FieldLegend>Shortcuts</FieldLegend>
         <Button
           variant="outline"
           onClick={() => append({ label: "", value: "" })}
@@ -38,18 +38,9 @@ export default function ShortcutsGroup() {
           <Empty>No hay atajos definidos.</Empty>
         ) : (
           fields.map((field, index) => (
-            <FieldGroup
-              key={field.id}
-              className="grid grid-cols-2 gap-2"
-            >
-              <TextField
-                name={`shortcuts.${index}.label`}
-                label="Atajo"
-              />
-              <TextField
-                name={`shortcuts.${index}.value`}
-                label="Valor"
-              />
+            <FieldGroup key={field.id} className="grid grid-cols-2 gap-2">
+              <TextField name={`shortcuts.${index}.label`} label="Atajo" />
+              <TextField name={`shortcuts.${index}.value`} label="Valor" />
               <Button variant="ghost" size="icon" onClick={() => remove(index)}>
                 <Trash />
               </Button>
@@ -60,4 +51,3 @@ export default function ShortcutsGroup() {
     </FieldSet>
   );
 }
-

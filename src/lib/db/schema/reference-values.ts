@@ -13,8 +13,8 @@ export const referenceValues = pgTable("reference_values", {
     })
     .notNull(),
   name: text("name").notNull(),
-  minRange: integer("min_range").notNull(),
-  maxRange: integer("max_range").notNull(),
+  minRange: integer("min_range"),
+  maxRange: integer("max_range"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
