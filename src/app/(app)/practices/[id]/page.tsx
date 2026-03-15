@@ -9,16 +9,17 @@ import { eq, asc } from "drizzle-orm";
 // Components
 import PracticeFieldsGroup from "@/components/practice-fields/practice-fields-group";
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: { id: number } }) {
   const { id } = await params;
 
   const practice = await db.query.labPractices.findFirst({
-    where: eq(labPractices.id, Number(id)),
+    where: eq(labPractices.id, id),
     with: {
       labPracticeFields: {
         orderBy: [asc(labPracticeFields.hierarchy)],
         with: {
           referenceValues: true,
+          shortcuts: true,
         },
       },
     },

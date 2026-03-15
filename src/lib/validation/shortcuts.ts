@@ -24,25 +24,4 @@ export const shortcutsSchema = z.object({
   updatedAt: z.date("La fecha de actualización debe ser una fecha."),
 });
 
-export const selectSchema = shortcutsSchema.pick({
-  id: true,
-});
-
-export const insertSchema = shortcutsSchema.pick({
-  labPracticeFieldId: true,
-});
-
-export const updateSchema = shortcutsSchema
-  .pick({
-    id: true,
-    label: true,
-    value: true,
-  })
-  .partial({
-    label: true,
-    value: true,
-  });
-
 export type Shortcuts = z.infer<typeof shortcutsSchema>;
-export type InsertShortcuts = z.infer<typeof insertSchema>;
-

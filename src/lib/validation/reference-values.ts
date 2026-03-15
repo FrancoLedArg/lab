@@ -31,26 +31,4 @@ export const referenceValuesSchema = z.object({
   updatedAt: z.date("La fecha de actualización debe ser una fecha."),
 });
 
-export const selectSchema = referenceValuesSchema.pick({
-  id: true,
-});
-
-export const insertSchema = referenceValuesSchema.pick({
-  labPracticeFieldId: true,
-});
-
-export const updateSchema = referenceValuesSchema
-  .pick({
-    id: true,
-    name: true,
-    minRange: true,
-    maxRange: true,
-  })
-  .partial({
-    name: true,
-    minRange: true,
-    maxRange: true,
-  });
-
 export type ReferenceValues = z.infer<typeof referenceValuesSchema>;
-export type InsertReferenceValues = z.infer<typeof insertSchema>;

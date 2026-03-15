@@ -2,14 +2,8 @@
 import { z } from "zod";
 
 // Validation Schemas
-import {
-  referenceValuesSchema,
-  updateSchema as updateReferenceValuesSchema,
-} from "@/lib/validation/reference-values";
-import {
-  shortcutsSchema,
-  updateSchema as updateShortcutsSchema,
-} from "@/lib/validation/shortcuts";
+import { referenceValuesSchema } from "@/lib/validation/reference-values";
+import { shortcutsSchema } from "@/lib/validation/shortcuts";
 
 export const labPracticeFieldSchema = z.object({
   id: z
@@ -57,12 +51,31 @@ export const updateSchema = labPracticeFieldSchema
     name: true,
     dataType: true,
     unit: true,
-    hierarchy: true,
   })
-  .partial()
   .extend({
-    referenceValues: z.array(updateReferenceValuesSchema),
-    shortcuts: z.array(updateShortcutsSchema),
+    referenceValues: z.array(
+      referenceValuesSchema
+        .pick({
+          id: true,
+          name: true,
+          minRange: true,
+          maxRange: true,
+        })
+        .partial({
+          id: true,
+        }),
+    ),
+    shortcuts: z.array(
+      shortcutsSchema
+        .pick({
+          id: true,
+          label: true,
+          value: true,
+        })
+        .partial({
+          id: true,
+        }),
+    ),
   });
 
 export type LabPracticeField = z.infer<typeof labPracticeFieldSchema>;
