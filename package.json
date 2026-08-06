@@ -9,17 +9,18 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "auth:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder} BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-abcdefghijklmnopqrstuvwxyz123456} pnpm dlx @better-auth/cli@latest generate --config src/server/auth/index.ts --output src/server/db/schema/auth.ts -y"
+    "db:generate": "drizzle-kit generate --config=src/config/drizzle-kit.ts",
+    "db:migrate": "drizzle-kit migrate --config=src/config/drizzle-kit.ts",
+    "db:push": "drizzle-kit push --config=src/config/drizzle-kit.ts",
+    "db:studio": "drizzle-kit studio --config=src/config/drizzle-kit.ts",
+    "auth:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder} BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-abcdefghijklmnopqrstuvwxyz123456} pnpm dlx @better-auth/cli@latest generate --config src/server/auth/index.ts --output src/lib/db/schema/auth.ts -y"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@better-auth/drizzle-adapter": "^1.6.26",
     "@hookform/resolvers": "^5.7.1",
     "@neondatabase/serverless": "^1.1.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "better-auth": "^1.6.26",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

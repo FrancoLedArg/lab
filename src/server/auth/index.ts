@@ -3,11 +3,13 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
 
-import { db } from "@/server/db";
-import * as schema from "@/server/db/schema";
+import { env } from "@/config/env";
+import { db } from "@/lib/db";
+import * as schema from "@/lib/db/schema";
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
@@ -20,8 +22,7 @@ export const auth = betterAuth({
       allowUserToCreateOrganization: true,
       creatorRole: "owner",
       async sendInvitationEmail(data) {
-        const baseUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
-        const inviteLink = `${baseUrl}/accept-invitation/${data.id}`;
+        const inviteLink = `${env.BETTER_AUTH_URL}/accept-invitation/${data.id}`;
         console.info("[auth] invitation email stub", {
           to: data.email,
           role: data.role,
