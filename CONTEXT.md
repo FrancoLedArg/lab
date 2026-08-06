@@ -1,14 +1,30 @@
 # Lab Management
 
-Clinical diagnostic lab operations for subscribed Labs: staff register Visits where Patient, coverage, and Medical Order data are captured, Specimens are collected, authorization and Charges are tracked (Obra Social–specific), Results are entered manually, and Results are delivered to the Patient. Accountability is derived. Multiple Labs subscribe; each Lab is a single site. One bounded context.
+Clinical diagnostic lab operations for subscribed Labs: Owner, Admin, and Member roles register Visits where Patient, coverage, and Medical Order data are captured, Specimens are collected, authorization and Charges are tracked (Obra Social–specific), Results are entered manually, and Results are delivered to the Patient. Accountability is derived. Multiple Labs subscribe; each Lab is a single site. One bounded context.
 
 ## Language
 
 ### Tenancy
 
 **Lab**:
-A single-site clinical diagnostic laboratory that subscribes to the product. The unit of tenancy and operational isolation. May send or receive Specimens via Derivation. The Lab (owner) decides processing and Result Delivery discretion (partial vs full, trust vs wait for payment/authorization).
-_Avoid_: Tenant (implementation), clinic, site (unless distinguishing rooms inside one Lab)
+A single-site clinical diagnostic laboratory that subscribes to the product. The unit of tenancy and operational isolation. May send or receive Specimens via Derivation. Processing and Result Delivery discretion (partial vs full, trust vs wait for payment/authorization) are Lab policy, exercised by its Owner, Admin, and Member roles.
+_Avoid_: Tenant (implementation), clinic, site (unless distinguishing rooms inside one Lab), Organization (prefer Lab in domain language; Better Auth’s organization is the persistence/membership mechanism)
+
+**Owner**:
+The single Better Auth organization role (`owner`) per Lab that creates it and pays for the product subscription. May also operate the desk and administer the Lab, including sending Invites. Open product registration is for becoming Owner of a new Lab, not for joining an existing one. Keeping ownership on the payer’s email avoids losing the billing identity if an Admin or Member leaves. The same person may be Owner of one Lab and Admin or Member of others.
+_Avoid_: Subscriber (as a separate person-type), Staff
+
+**Admin**:
+The Better Auth organization role (`admin`) that administers a Lab (including sending Invites) but does not pay the product subscription. May also operate the desk. Joins an existing Lab only via email Invite—not via open registration. Distinct from Owner: billing stays on the Owner.
+_Avoid_: Manager, Staff
+
+**Member**:
+The Better Auth organization role (`member`) that operates the Lab desk (Visits, Specimens, Results, Charges, etc.) without Lab administration or subscription payment duties. Does not send Invites. Joins an existing Lab only via email Invite—not via open registration. The same person may be Member of more than one Lab.
+_Avoid_: Staff, User, Operator, employee, Affiliate (Obra Social coverage person—not this role)
+
+**Invite**:
+An email invitation, sent by the Lab’s Owner or Admin, to join that Lab as Admin or Member (role chosen when sending). Owner is never granted via Invite. Acceptance establishes Lab membership; it is not product signup.
+_Avoid_: Register, sign-up (those mean Owner creating a new Lab)
 
 ### People & coverage
 
@@ -18,7 +34,7 @@ _Avoid_: Client, customer, afiliado
 
 **Affiliate**:
 The person whose Obra Social coverage is used. May differ from the Patient. Depending on Obra Social Policy, may authorize Practices (e.g. BOREAL) before or after the Visit.
-_Avoid_: Member, insured
+_Avoid_: Insured, afiliado (as English glossary term), Member (that is a Lab organization role—never an Obra Social coverage person)
 
 **Obra Social**:
 A health-coverage organization (e.g. IOSEP, BOREAL) with its own authorization channel, Co-seguro pattern, and coverage rules.
@@ -31,7 +47,7 @@ _Avoid_: Payment type, insurance type
 ### Visit & orders
 
 **Visit**:
-One Patient appearance at the Lab. Staff register Patient (and Affiliate) data, one or more Medical Orders, collect Specimen(s), record Practice Line authorization outcomes as far as known, and collect Charges due at that appearance. A later Medical Order may continue unfinished Practices; it may occur on a later Visit with or without a new draw (Lab discretion).
+One Patient appearance at the Lab. Desk roles (Owner, Admin, Member) register Patient (and Affiliate) data, one or more Medical Orders, collect Specimen(s), record Practice Line authorization outcomes as far as known, and collect Charges due at that appearance. A later Medical Order may continue unfinished Practices; it may occur on a later Visit with or without a new draw (Lab discretion).
 _Avoid_: Accession, encounter, appointment (unless you later mean scheduling)
 
 **Medical Order**:
@@ -102,6 +118,6 @@ _Avoid_: Integration config (implementation), full national rules engine
 
 ## Scaffold spine (agreed)
 
-In scope for shared language: Lab, Patient, Affiliate, Coverage Mode, Obra Social, Obra Social Policy (thin), Visit, Medical Order, Practice, Practice Line, Authorization Number (when Policy requires), Specimen, Result, Result Delivery, Charge, Co-seguro, Proof Document (retain for reprint/legal backup), Derivation, Accountability (derived), Authorization as Practice Line status.
+In scope for shared language: Lab, Owner, Admin, Member, Invite, Patient, Affiliate, Coverage Mode, Obra Social, Obra Social Policy (thin), Visit, Medical Order, Practice, Practice Line, Authorization Number (when Policy requires), Specimen, Result, Result Delivery, Charge, Co-seguro, Proof Document (retain for reprint/legal backup), Derivation, Accountability (derived), Authorization as Practice Line status.
 
-Parked: per–Obra Social website agents, WhatsApp authorization/payment chasing automation, rich tarifario overlays, full in-network Derivation automation, every regional edge case.
+Parked: per–Obra Social website agents, WhatsApp authorization/payment chasing automation, rich tarifario overlays, full in-network Derivation automation, every regional edge case, MercadoPago (SaaS subscription payment for Labs).
