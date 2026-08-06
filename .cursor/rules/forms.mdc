@@ -1,0 +1,82 @@
+---
+description: Forms — react-hook-form + Zod + FormProvider/useFormContext + shadcn Field. Apply when creating or editing forms, form fields, or client validation.
+globs: "**/*form*.tsx,**/*form*.ts,**/components/ui/form.tsx,**/components/ui/field.tsx"
+alwaysApply: false
+---
+
+# Forms
+
+Interactive forms use **react-hook-form** + **Zod** (`zodResolver`). Layout/a11y use `@/components/ui/field`. Context wiring uses `@/components/ui/form`.
+
+## Stack
+
+- Schema: Zod (share with `next-safe-action` `.inputSchema` when the same shape hits the server)
+- Form state: `useForm` + `zodResolver`
+- Provider: `<Form {...form}>` (`FormProvider`) so fields never take `control`
+- Fields: reusable components with `FormField` + `useFormContext` — not inline `useState`
+- Markup: `Field`, `FieldLabel`, `FieldError`, `FieldGroup`, `FieldDescription`
+
+## Pattern
+
+```tsx
+"use client"
+
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+
+import { Form } from "@/components/ui/form"
+import { FieldGroup } from "@/components/ui/field"
+import { EmailField } from "@/components/forms/email-field" // reusable
+
+const schema = z.object({ email: z.email() })
+
+export function InviteForm() {
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "" },
+  })
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit((data) => { /* call safe action */ })}>
+        <FieldGroup>
+          <EmailField />
+        </FieldGroup>
+      </form>
+    </Form>
+  )
+}
+```
+
+Reusable field (no `control` prop):
+
+```tsx
+"use client"
+
+import { FormField } from "@/components/ui/form"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+
+export function EmailField() {
+  return (
+    <FormField
+      name="email"
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+          <Input {...field} id={field.name} type="email" aria-invalid={fieldState.invalid} />
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+        </Field>
+      )}
+    />
+  )
+}
+```
+
+## Rules
+
+- Put shared fields under `src/components/forms/`
+- Set `data-invalid` on `Field` and `aria-invalid` on the control
+- Prefer `FormField` over prop-drilling `control` or bare `Controller`
+- Do not manage field values with `useState`
