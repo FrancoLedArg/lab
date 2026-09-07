@@ -391,8 +391,8 @@ it" are different roles in the model.
 
 **Scope caveat:** Ley 17.132 is national law applicable in CABA and federal jurisdiction. Each province
 has its own *ejercicio profesional* law and its own colegio de bioquímicos issuing the matrícula
-(e.g. [Ley 8271 de Córdoba](https://www.argentina.gob.ar/normativa/provincial/ley-8271-123456789-0abc-defg-172-8000bvorpyel/actualizacion),
-colegiación obligatoria). The DT-signs rule is uniform in substance; the matrícula's issuer, format,
+(e.g. [Ley 8271 de la Provincia de Buenos Aires](https://www.argentina.gob.ar/normativa/provincial/ley-8271-123456789-0abc-defg-172-8000bvorpyel/actualizacion),
+colegiación obligatoria; Córdoba's equivalent is **Ley 5197**). The DT-signs rule is uniform in substance; the matrícula's issuer, format,
 and prefix are **not**. Store matrícula as a `{jurisdiction, type, number}` triple, never a bare
 integer, and do not assume a national check-digit scheme.
 
