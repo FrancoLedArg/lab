@@ -151,7 +151,8 @@ Bioquímico to judge every value by hand.
 | Field | Notes |
 |---|---|
 | **type** | The container — *suero, EDTA, citrato, orina, hisopado…*, never the coarse *sangre*. **Refinable**: at the chair the nurse may only know *sangre*; it sharpens when the lab knows which tube the analysis ran off. |
-| **drawn_at** | When the draw was recorded. |
+| **drawn_at** | When the draw happened, **as staff record it** — typed and editable. A lab entering Saturday's work on Monday must be able to say Saturday. Prints on the report. |
+| **recorded_at** | When our server received the entry. **Never editable, never shown.** The pair is the general rule, not a muestra quirk — see the legal posture below. |
 | **drawn_by** | The logged-in user. Staff log in and record their own draws — the *collected* actor Ley 17.132 wants recorded apart from whoever runs the assay. |
 | **state** | `usable` or `rejected`. There is no third state. |
 | **rejection_reason** | From a **lab-editable list** (hemolizada, insuficiente, coagulada, contaminada, mal rotulada), or free text. |
@@ -219,10 +220,9 @@ been misled. Once Ana has the PDF, an amendment
 
 The driver is adoption, not tidiness: a Bioquímico who cannot fix a two-minute-old mistake without a
 permanent mark keeps a paper notebook instead, and an app the professional avoids records nothing at
-all. ⚠️ **This depends on a legal answer** — whether Dto. 1089/2012 art. 15 binds at the endorsement
-or at the emission. The question is open on
-[#5](https://github.com/FrancoLedArg/lab/issues/5#issuecomment-5494499919). If it binds at approval,
-this decision reverses.
+all. **No longer conditional** ([#26](https://github.com/FrancoLedArg/lab/issues/26)): the record
+keeps every version either way, so whether Dto. 1089/2012 art. 15 binds at the endorsement or at the
+emission does not change what we build. It changes only what *prints*, and that is the lab's choice.
 
 ### The rule this ticket generalised
 
@@ -241,3 +241,37 @@ lab is free to overwrite.
 | Aliquot lineage, chain of custody | The placeholder tube has no number and no life after the split. `ponytail:` a muestra records the container the analysis used, not where the material came from. One field to add later, not a redesign. |
 | Barcodes, storage location, centrifugation steps, stability clocks, volume tracking | None of it happens on paper today. The lab writes a number on a tube and the tube is walked to the bench. |
 | *Aceptada con reparos* as a third state | The note is what the law wants printed, not the category. A third state makes staff classify a judgement call before they can move, and changes nothing downstream. |
+
+---
+
+## The legal posture — settled by [#26](https://github.com/FrancoLedArg/lab/issues/26)
+
+Full decision: [`docs/adr/0001-legal-posture.md`](docs/adr/0001-legal-posture.md). **We are not the
+regulator and not the guarantor** — the habilitación belongs to the lab, the matrícula to the
+professional. Three rules from it govern every other section here.
+
+### 6. A field ships only if the lab would want it with the law repealed
+
+The law alone is never a reason. This stands in front of rule 4: *the compliant path must be the easy
+path* says compliance has to fall out of work the lab already does, and this says what to do when it
+does not — leave the field out. Técnicos have never heard of Ley 26.529 and still record who drew the
+muestra, because the lab needs it.
+
+**No screen shows the name of a law.** No tooltip, no warning, no *required by art. 16*. If a field
+cannot be explained in the técnico's own words, it has not earned its place.
+
+### 7. The record never loses a version, and never names the wrong person
+
+Staff **change** anything — a patient's name, a forgotten TSH, a Measurement. Nothing is deleted, and
+every change keeps the old value, the person and the time. The reason is not the law: *the fix can
+also be wrong*, and then the lab needs the value from before the fix.
+
+We never print a Bioquímico who did not approve. Both rules exist so **the responsible person is
+always findable** — which is what makes *we only give the lab a tool* true. The patient talks to the
+Bioquímico, not to us, and that only works while the record can name one.
+
+### 8. What goes to the patient is not what the lab holds
+
+The lab decides what prints; the record keeps everything. A corrected report prints clean or prints
+*rectificado* — the lab's call, and version 1 survives either way. Staff type `drawn_at`; the server
+keeps `recorded_at`.
