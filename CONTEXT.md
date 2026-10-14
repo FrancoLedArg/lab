@@ -275,3 +275,210 @@ Bioquímico, not to us, and that only works while the record can name one.
 The lab decides what prints; the record keeps everything. A corrected report prints clean or prints
 *rectificado* — the lab's call, and version 1 survives either way. Staff type `drawn_at`; the server
 keeps `recorded_at`.
+
+---
+
+## The lab and its people — settled by [#7](https://github.com/FrancoLedArg/lab/issues/7)
+
+### The lab
+
+A **Lab** is one **habilitación**. Not one owner and not one building — the habilitación, because a
+report's letterhead, address, matrícula and habilitación number are all per-site
+([#11](https://github.com/FrancoLedArg/lab/issues/11)).
+
+v1 runs **two labs**: two bioquímicas, two matrículas, two habilitaciones, one of them a partner in
+both. They share **nothing** — not patients, not catalog, not prices, not ranges. See
+[`docs/adr/0002-v1-is-two-labs.md`](docs/adr/0002-v1-is-two-labs.md).
+
+### User and Membership
+
+A **User** is a person, and one person is one User however many labs they work in. A **Membership** is
+that person's role at one lab. The bioquímica who works at both has **one login and two memberships**,
+and switches labs inside the app.
+
+Two logins for one human would put two names in the record for one person, and the floor of ADR 0001
+exists to stop exactly that. Nor would the split survive contact: nobody keeps two passwords, she
+would reuse one, and we would have the separation in the schema and not in reality.
+
+### The two roles
+
+| Role | What they do |
+|---|---|
+| **Técnico** | Registers patients, takes ordens, draws, records and rejects muestras, enters results. **Cannot approve.** |
+| **Bioquímico** | Everything a Técnico does, **and approves**. Sets the total on an orden. |
+
+**Approval is the only gate in the product.** Enforced as *product*, not as law — it survives the law's
+repeal, so it passes ADR 0001's admission test. It is a **role gate**: we never check a matrícula.
+
+**Any staff member may reject a muestra**, Técnico included — haemolysis is a physical fact, not a
+professional judgement, and a Bioquímico gate stalls a dead tube exactly when they are out
+([#19](https://github.com/FrancoLedArg/lab/issues/19)).
+
+**Nobody reviews an orden a Técnico entered.** A review step nobody asked for becomes a button pressed
+without reading.
+
+### Administrativo is a real role and not a v1 user
+
+The person at the mostrador exists and is **not in the software**. The app has nothing for them yet, so
+a login would hand them the Técnico's screens and call it a role. When the mostrador enters, it enters
+with its own screens and its own money flow, together.
+
+What that person spends the day on is answering *"¿ya está?"* on the phone. The patient-facing version
+— a WhatsApp assistant — is post-v1, and the channel it needs already exists for report delivery.
+
+### A report names two different people
+
+Conflating them breaks the first day a second lab exists:
+
+| | Who | Scope |
+|---|---|---|
+| **Director técnico** | the lab's director, with **that lab's** matrícula, phone and address | per **lab**, fixed |
+| **Approving Bioquímico** | whoever approved **that** result | per **result** |
+
+Usually the same person; sometimes not. When one bioquímica covers for the other over holidays the
+lab's director técnico has not changed, and the report may not claim she approved what she did not.
+The second column is what ADR 0001's floor — *the record never names the wrong person* — is about.
+
+### Deliberate v1 cuts
+
+| Cut | Why |
+|---|---|
+| Administrativo as a user | No screens of their own yet, so the login would be a lie about the role. |
+| Granular permissions, configurable roles, a roles admin screen | Two roles and one gate. Configuration exists to serve strangers, and ADR 0002 says there are none. |
+| A review step before the draw | Nobody asked for it, and it would be clicked through. |
+| Patient and referring-doctor logins | Settled before any ticket existed. |
+
+---
+
+## Derivación — settled by [#21](https://github.com/FrancoLedArg/lab/issues/21)
+
+### What it is
+
+A **derivación** is a práctica on an orden that **another lab runs**. In the model it is a **flag and
+the other lab's name** on the OrderedPractice, and the value comes back and is **entered by hand**.
+
+That is the whole mechanism, and it is identical whether the other lab runs this software or not.
+Bacteriología goes to Gornitz, which has never heard of us; a hormone goes to our own second lab.
+Designing the handoff between our two labs *first* and bolting the external case on afterwards gives
+two mechanisms for one job — and **the external case is the common one.**
+
+**The two ordens are never linked**, even when both labs run this software. The receiving lab
+registers its own work on its own orden and the two records do not know about each other. Nothing
+about the patient crosses: *shares nothing* means nothing, not nothing-except.
+
+### What the flag buys
+
+Both pass ADR 0001's admission test — the lab wants them with the law repealed:
+
+1. **The report can name the lab that performed it.** The data is already sitting there.
+2. **The pending list stops lying.** A derived práctica is pending for days, and without the flag it is
+   indistinguishable from one that was forgotten. *Waiting on Gornitz* and *we dropped this* look the
+   same and need opposite actions.
+
+### Its shape
+
+- The derivación hangs off the **OrderedPractice, not the muestra**, so `state` keeps its two values,
+  `usable` and `rejected`. A tube that travelled is still usable, just elsewhere.
+- The destination is a **list that grows from use**, like rejection reasons. Free text alone leaves
+  *Gornitz*, *gornitz* and *Lab Gornitz* across three reports.
+- **A derived result is usually text plus an attached file.** A derived práctica is by definition one
+  this lab does not run, so it has no Analytes and no ranges in this catalog — and bacteriología comes
+  back as a narrative anyway. The model already covers it: value type `text` has no reference range,
+  and an OrderedPractice already carries attachments ([#20](https://github.com/FrancoLedArg/lab/issues/20)).
+  **Nobody types a reference range that is not theirs.**
+- **If the other lab rejects the tube, the lab that drew it notifies the patient.** Ana is their
+  patient. That is the existing *rejecting is notifying* mechanism, unchanged.
+
+### Deliberate v1 cuts
+
+| Cut | Why |
+|---|---|
+| A cross-tenant handoff between our two labs | A tube that travels by car does not need a two-sided protocol, and the bioquímica is in both labs supervising it herself. |
+| Sending the patient's sex and age to the receiving lab | Designed, then deleted with the handoff. It was needed only because the receiving lab would interpret the range; with manual entry the lab that ran it marks its own range on its own orden. |
+| The inter-lab account | Lab B bills Lab A monthly. Real, and not money the patient pays. |
+| A `Derivation` entity | It is a flag and a name on a row that already exists. |
+
+---
+
+## Money — settled by [#9](https://github.com/FrancoLedArg/lab/issues/9)
+
+### Price and Payment are different jobs
+
+**Price** is what Ana owes. **Payment** is what came in. The second is the one that protects the person
+holding the money, and it needs none of the first.
+
+A Técnica who takes a 60.000 transfer into the bioquímica's account needs that recorded **under her own
+name**, so the day closes and nobody is under suspicion. She would want it with every law repealed —
+the strongest pass of ADR 0001's admission test anywhere in this model.
+
+### Payment
+
+| Field | Notes |
+|---|---|
+| amount | |
+| **medio** | *efectivo*, *transferencia* — a list that grows from use |
+| received_by | the logged-in user |
+| dates | the one staff type and the one the server records, as everywhere |
+| comprobante | an optional photo — **stored, never read** |
+
+**An append-only list on the orden.** Ana pays 25.000 at the draw and 40.000 at pickup: two Payments. A
+Payment is never edited; a wrong one is corrected by adding the correction.
+
+The photo is **evidence, not data entry**. Typing `25000` takes three seconds, and what protects the
+Técnica is the comprobante existing — not having typed it faster. Reading the amount off a photo saves
+nothing and fails in the worst way: a misread number that nobody checks. (Same family as
+[#10](https://github.com/FrancoLedArg/lab/issues/10); it can earn its place there.)
+
+**There is one bank account**, so a Payment records no destination.
+
+### The total, and the balance
+
+The orden carries a **total**. The **balance is a subtraction** — total minus its Payments, computed and
+never stored. 65.000, 25.000 in, 40.000 to go.
+
+**The total is the Bioquímico's number.** The app computes a suggestion; she rounds 62.300 up to 65.000,
+or gives a discount, and that is her lab's business.
+
+This is the **third independent landing** of *the app ships a suggestion, the lab owns it, nothing is
+definitive* — after reference ranges (#20) and sample instructions (#19), now money, arrived at from a
+different direction each time. That is the spine of the product, not a coincidence.
+
+### What the app computes
+
+Each OrderedPractice records whether the obra social **authorized** it — per práctica, not per orden.
+Then, against the UB coefficient the catalog already holds:
+
+| | Valued at |
+|---|---|
+| authorized | the **obra social's** UB value |
+| not authorized | the **Colegio de Bioquímicos'** UB value |
+| plus | the **copago**, typed off the bono |
+
+There is no price list to maintain and no per-lab *particular* price to invent: the number for
+unauthorized work is external and published.
+
+**UB values are per obra social, carry the date they took effect, and are entered by hand.** The UB peso
+value moves monthly ([#2](https://github.com/FrancoLedArg/lab/issues/2)) and nobody tells the app. A
+stale value **shows as stale, with its date**, and is never silently corrected.
+
+### We never encode an obra social's method
+
+Twenty obras sociales operate twenty ways and change when they like. **A rule we maintain for somebody
+else's policy is a rule that is wrong in silence** — and silently wrong is worse than absent, because the
+number looks computed. So the copago is a number a person read off the bono in their hand, and **that is
+the destination, not a stopgap**.
+
+This is ADR 0001's tier 3 — *nothing: no check, no warning, no block* — pointed at obras sociales
+instead of at the law.
+
+### Deliberate v1 cuts
+
+| Cut | Why |
+|---|---|
+| A price list | The total is the Bioquímico's call and moves per patient. A list would be overridden every time. |
+| Coseguro rules per obra social | See above: twenty methods, maintained by us, wrong in silence. |
+| **The monthly presentación to obras sociales** | The circuit a lab lives off, and a process of its own — [#8](https://github.com/FrancoLedArg/lab/issues/8). Cheap to defer: everything it needs (obra social, per-práctica authorization, the month's UB value, código NBU) is already recorded for the copago. Same data, another screen. |
+| MercadoPago, both flows | We process no money at all. The research stands on [#3](https://github.com/FrancoLedArg/lab/issues/3). |
+| Reading the comprobante with AI | See above. |
+| A bank-account model | There is one account. |
+| The AFIP/ARCA factura | Nobody asked, and no payment processor issues it ([#3](https://github.com/FrancoLedArg/lab/issues/3)). The lab invoices the way it invoices today. |
