@@ -10,6 +10,20 @@ present yet are not yet decided — do not invent them.
 *Cargar* means **enter / load data**, never money — use *register* / *enter* for data entry and
 reserve *charge* / *bill* for money.
 
+> **In flight — [#22](https://github.com/FrancoLedArg/lab/issues/22) has overturned parts of what
+> follows, and has not resolved yet.** Three things below are now wrong, and the full record is on
+> the ticket:
+>
+> - **An *orden* is the doctor's paper, not the visit.** Everything below uses *orden* for the
+>   visit. The visit is a **Ficha** — it holds the patient, the tubes and the money. Several ordens
+>   can hang off one Ficha, and the report is **one sheet per orden**.
+> - **The word is *validar*, not *approve*.** A result is **cargada** by a Técnico and **validada**
+>   by a Bioquímico. Every *approve / approval* below is the wrong word, not a wrong decision.
+> - **A muestra carries its own number.** #19's cut is reverted — see the muestra section.
+>
+> Nothing else below is affected. These get renamed in place when #22 resolves; until then, read
+> *orden* as *ficha* and *approve* as *validar*.
+
 ---
 
 ## The catalog and the result — settled by [#20](https://github.com/FrancoLedArg/lab/issues/20)
@@ -158,9 +172,21 @@ Bioquímico to judge every value by hand.
 | **rejection_reason** | From a **lab-editable list** (hemolizada, insuficiente, coagulada, contaminada, mal rotulada), or free text. |
 | **quality_note** | Free text, **independent of state**, printing beside results — the *calidad inadecuada* caveat MERCOSUR §4.7.3 requires. Usually added by the Bioquímico at approval, when they can tell whether the haemolysis actually mattered. |
 
-**A muestra carries no number.** The one thing the lab writes on a tube is the **orden's** number, and
-it goes on every container from that visit — it identifies the patient, not the tube. Two containers
-with the same number are told apart by their type, exactly as they are on the bench by cap colour.
+~~**A muestra carries no number.** The one thing the lab writes on a tube is the **orden's** number,
+and it goes on every container from that visit — it identifies the patient, not the tube.~~
+**Overturned by [#22](https://github.com/FrancoLedArg/lab/issues/22)**: asked with this section's own
+centrifuge scene — one draw, an EDTA tube and a serum tube, pick up the fibrón — the answer was *two
+different numbers*. **Each container has its own number.**
+
+One counter, not two: the **Ficha** is `0471` for the month, and its tubes are `471-MG-1` and
+`471-MG-2`. The initials are the **patient's**, and they are there so a técnico catches a crossed name
+by reading the tube — the failure that put this on #22 in the first place was a calcemia entered where
+the doctor asked calciuria. **Stickers are out** (*"son muy caros"*), so every number is written by hand
+with a fibrón, which is a standing constraint on the length of anything we number. The counter resets
+monthly and that is safe because *"nada queda más de una semana."*
+
+The model is better for it: a rejected tube and the one that replaced it are now distinguishable on the
+bench without the system.
 
 ### The links
 
@@ -236,7 +262,7 @@ lab is free to overwrite.
 | Cut | Why |
 |---|---|
 | `received_at` and a `received` state | Nobody records that a tube reached the bench. The field would be a timestamp the app invented. |
-| A number on the muestra | The orden's number is what the lab writes, on every container. |
+| ~~A number on the muestra~~ | **Reverted by [#22](https://github.com/FrancoLedArg/lab/issues/22)** — each container has its own number. |
 | `replaces` on a re-drawn muestra | The append-only list already holds it, in date order — and art. 16 forces us to keep that link anyway. Two mechanisms, one job. |
 | Aliquot lineage, chain of custody | The placeholder tube has no number and no life after the split. `ponytail:` a muestra records the container the analysis used, not where the material came from. One field to add later, not a redesign. |
 | Barcodes, storage location, centrifugation steps, stability clocks, volume tracking | None of it happens on paper today. The lab writes a number on a tube and the tube is walked to the bench. |
