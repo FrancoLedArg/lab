@@ -6,23 +6,139 @@ Written lazily, as tickets resolve. Each section names the ticket that settled i
 present yet are not yet decided — do not invent them.
 
 **Language rule**: the domain is Argentine. Spanish terms staff actually say are kept as-is
-(*Bioquímico*, *muestra*, *orden*, *práctica*, *obra social*). Everything else is English.
+(*Bioquímico*, *Ficha*, *orden*, *muestra*, *práctica*, *obra social*, *validar*). Everything else is
+English.
 *Cargar* means **enter / load data**, never money — use *register* / *enter* for data entry and
 reserve *charge* / *bill* for money.
 
-> **In flight — [#22](https://github.com/FrancoLedArg/lab/issues/22) has overturned parts of what
-> follows, and has not resolved yet.** Three things below are now wrong, and the full record is on
-> the ticket:
->
-> - **An *orden* is the doctor's paper, not the visit.** Everything below uses *orden* for the
->   visit. The visit is a **Ficha** — it holds the patient, the tubes and the money. Several ordens
->   can hang off one Ficha, and the report is **one sheet per orden**.
-> - **The word is *validar*, not *approve*.** A result is **cargada** by a Técnico and **validada**
->   by a Bioquímico. Every *approve / approval* below is the wrong word, not a wrong decision.
-> - **A muestra carries its own number.** #19's cut is reverted — see the muestra section.
->
-> Nothing else below is affected. These get renamed in place when #22 resolves; until then, read
-> *orden* as *ficha* and *approve* as *validar*.
+## The Ficha and the orden — settled by [#22](https://github.com/FrancoLedArg/lab/issues/22)
+
+### Four levels
+
+Everything written before #22 used *orden* for the visit. Staff do not: an **orden** is the doctor's
+paper, and the visit had no name until the user gave it one.
+
+| Level | What it is | Holds |
+|---|---|---|
+| **Ficha** | One patient's visit. | the patient, its number, the **promised date**, **the money** (total and Payments) |
+| **Orden** | One doctor's paper. | the *médico solicitante*, **the report** — one sheet per orden |
+| **OrderedPractice** | One práctica on that paper. | its obra social and authorization, the result |
+| **Muestra** | One working container. | its own number ([#19](https://github.com/FrancoLedArg/lab/issues/19)) |
+
+**Money is per Ficha, the report is per Orden.** One draw, one amount, one sheet per paper: Ana brings
+the clínico's hemograma and the endocrinólogo's TSH, pays once and receives two sheets.
+
+- **Walk-in only.** The patient arrives with the paper. No draft Ficha, no booking that carries studies.
+- **The Orden is the mandatory parent of every práctica, and its doctor is required.** When a patient
+  arrives with no paper, the lab gets a doctor to write one; the app has no exit the lab does not have.
+- **The patient comes from the person, not the paper.** Valentina may bring her grandmother's orden;
+  the Ficha is Valentina's. The name written on the paper is not stored.
+- **Obra social is per OrderedPractice**, not per Ficha or Orden. One práctica OSDE will not authorize
+  may go through another obra social, or be paid out of pocket.
+- **Facturación hangs off the Orden** — billing the Colegio de Bioquímicos. It is why the Orden is an
+  entity rather than a grouping, and it is deliberately not designed yet.
+- **Payment gates nothing.** Ana owes 65.000, brings 25.000, and is drawn.
+
+### Patient
+
+**Found by DNI**, falling back to the name. The DNI is optional — a baby without one yet is registered
+under the baby's own name, never the mother's DNI — and **unique within a lab** when present. A patient
+of both labs is two patients: the labs share nothing.
+
+### Médico solicitante
+
+A thin per-lab record, **grown from use**: name required, matrícula filled whenever someone has it.
+Typeahead over this lab's doctors, with *Create "Juan Pérez"* on no match. Prints on the report. **No
+merge tool** — edit or deactivate only.
+
+### Numbers
+
+One counter per lab, **starting at 1 and resetting monthly** — nothing stays in the lab more than a
+week, and a month is the safe bet. The Ficha is `0471` on screen within the month and `2610-0471` where
+it must be unique. Its tubes are `471-MG-1`, `471-MG-2`.
+
+The **initials** are the patient's — first letter of the first given name and of the first surname,
+always two, accents dropped, Ñ kept: *María José González Paz* is **MG**. They let a técnico catch a
+crossed name by reading the tube. Every number is **written by hand with a fibrón** (stickers are too
+expensive), which caps the length of anything we number.
+
+The Ficha number is **internal**. Patients are found by DNI, so nothing requires it on the report
+([#12](https://github.com/FrancoLedArg/lab/issues/12) decides whether it prints).
+
+### Changing a Ficha
+
+- **Adding a práctica is open until its orden's report leaves.** It needs a muestra — the existing tube
+  if it serves, a new draw if not. #19's append-only list covers it.
+- **Removing a práctica is ungated, at any moment before delivery.** After delivery it is an amendment
+  ([#23](https://github.com/FrancoLedArg/lab/issues/23)): the paper has left the lab.
+- **A substitution is a removal plus an addition.** No `replaces` field — the second time that cut won,
+  after #19's re-drawn muestras.
+
+### Anulada
+
+A removed práctica is **anulada**, never deleted: actor, time, and a **reason from a list grown from
+use**. Three so far:
+
+| Reason | Scene |
+|---|---|
+| *práctica equivocada* | calcemia entered where the doctor asked calciuria |
+| *no autorizada y no la paga* | the authorization arrives after the draw without vitamina D, and Ana will not pay it |
+| *el paciente no volvió* | the tube was rejected and Ana never came back — today it stays open in the notebook until someone crosses it out |
+
+An anulada práctica is **not billed and not printed**, and stays in the record — **including any value
+already entered**. If the vitamina D was already run, the lab absorbs the cost.
+
+**Whatever the reason, the report simply omits it.** Asked with *muestra no recibida* — Ana's orden
+asked for an orina completa and she never brought the urine — the answer was the same: no line. That
+overturns #19's proposal that the report print *"orina completa: muestra no recibida"*. Nothing anuls by timer
+([#19](https://github.com/FrancoLedArg/lab/issues/19)).
+
+### Delivery and the lock
+
+**Each Orden locks when its report leaves**, which is #19's *lock at delivery* landing per Orden. The
+lab usually sends everything together, but that is its call with each patient: if Ana wants the
+hemograma now, that sheet leaves and locks, and the TSH stays editable until Friday.
+
+### What staff look at: pendientes and alertas
+
+The home screen is the common actions — **nueva extracción** runs the whole flow, patient included —
+over two lists.
+
+**Almost nothing is a stored state.** The **pendientes** are questions about data that already exists:
+*sin extraer* (no muestra), *para procesar* (usable tube, no value), *para validar*, *para entregar*,
+*esperando re-extracción* (every muestra rejected), *esperando a Gornitz* (the derivación flag, no
+value).
+
+The **alertas**:
+
+| Alerta | Comes from |
+|---|---|
+| **Due** — the promised date is today or tomorrow, or has passed, and the report has not left | the promised date |
+| **Talk to the patient** — an authorization is pending or not authorized | the authorization, until someone marks *avisado* |
+
+A rejected tube raises no alerta: **rejecting is notifying** ([#19](https://github.com/FrancoLedArg/lab/issues/19)),
+so the message left with the rejection and the práctica waits in *esperando re-extracción*.
+
+What a person does record:
+
+| Field | Notes |
+|---|---|
+| **promised date** | One per Ficha. The técnica types it from experience when the patient leaves. **No suggestion** — nobody has turnaround times, least of all for derived prácticas, and they vary by lab. |
+| **authorization** | `pending`, `authorized` or `not authorized` — see *Money*. |
+| **anulada** | actor, time, reason. |
+| **avisado** | who, and when. Contact is mostly by message from the lab's phone; the app sends nothing for it. |
+
+### Deliberate v1 cuts
+
+| Cut | Why |
+|---|---|
+| Draft or scheduled Fichas | Walk-in only — there is no batch from an obra social and no booking. |
+| A suggested delivery date | No source of turnaround times exists. `drawn_at` and delivery are both recorded, so after a few months the data will exist by itself if anyone asks. |
+| A configurable alert system | Each alerta is added when somebody asks for it. |
+| A free-text *avisar al paciente* note | Both reasons to contact a patient fall out of the data. It comes when a third reason does. |
+| `replaces` on a substitution | Removal and addition, both dated, already tell the story. |
+| A merge tool for doctors | Edit or deactivate only. |
+| Stickers, barcodes | Too expensive. The fibrón is the label. |
 
 ---
 
@@ -36,7 +152,7 @@ them apart.
 | Term | Definition | Scene |
 |---|---|---|
 | **Practice** | A line in one lab's menu. What the lab offers. | *"we do hemograma, NBU 660475"* |
-| **OrderedPractice** | One Practice placed on one orden. | *"Ana's hemograma, drawn 8am, approved 11am"* |
+| **OrderedPractice** | One Practice placed on one orden. | *"Ana's hemograma, drawn 8am, validada 11am"* |
 | **Analyte** | One thing a lab can measure, with its unit and what counts as normal. Belongs to the lab, not to a Practice. | *"hemoglobina, g/dL"* |
 | **Measurement** | One measured line, for one patient, under one OrderedPractice. | *"Ana's hemoglobina: 13.2 g/dL"* |
 
@@ -93,7 +209,7 @@ A range set is **any length**: one line for some analytes, ~20 for inmunoglobuli
 infants by month of age. **Ages are stored in days**, always — one integer, covers a 4-day-old and a
 50-year-old alike. The lab types *"1 a 3 meses"* and the app converts.
 
-Range sets ship **suggested**. The first time a Bioquímico approves a result that uses one, the app
+Range sets ship **suggested**. The first time a Bioquímico validates a result that uses one, the app
 asks them to confirm it — once, at the moment they are already signing by law. Then never again.
 What fills them is [#18](https://github.com/FrancoLedArg/lab/issues/18)'s job.
 
@@ -126,7 +242,7 @@ only because an Analyte belongs to the lab rather than to a Practice.
 ### Rules underneath the model
 
 1. **No setup phase.** A práctica gets its analytes, units and ranges the first time it is actually
-   used — never in an onboarding screen. A lab signs up and takes ordens the same hour.
+   used — never in an onboarding screen. A lab starts and opens Fichas the same hour.
 2. **The lab overrides nothing**, so there is no revert and no "store only the diff" machinery.
 3. **Copy, never point**, for anything that gets printed.
 4. **The compliant path must be the easy path.** Labs will not do extra work to be compliant, so
@@ -170,23 +286,13 @@ Bioquímico to judge every value by hand.
 | **drawn_by** | The logged-in user. Staff log in and record their own draws — the *collected* actor Ley 17.132 wants recorded apart from whoever runs the assay. |
 | **state** | `usable` or `rejected`. There is no third state. |
 | **rejection_reason** | From a **lab-editable list** (hemolizada, insuficiente, coagulada, contaminada, mal rotulada), or free text. |
-| **quality_note** | Free text, **independent of state**, printing beside results — the *calidad inadecuada* caveat MERCOSUR §4.7.3 requires. Usually added by the Bioquímico at approval, when they can tell whether the haemolysis actually mattered. |
+| **quality_note** | Free text, **independent of state**, printing beside results — the *calidad inadecuada* caveat MERCOSUR §4.7.3 requires. Usually added by the Bioquímico at validation, when they can tell whether the haemolysis actually mattered. |
 
-~~**A muestra carries no number.** The one thing the lab writes on a tube is the **orden's** number,
-and it goes on every container from that visit — it identifies the patient, not the tube.~~
-**Overturned by [#22](https://github.com/FrancoLedArg/lab/issues/22)**: asked with this section's own
-centrifuge scene — one draw, an EDTA tube and a serum tube, pick up the fibrón — the answer was *two
-different numbers*. **Each container has its own number.**
-
-One counter, not two: the **Ficha** is `0471` for the month, and its tubes are `471-MG-1` and
-`471-MG-2`. The initials are the **patient's**, and they are there so a técnico catches a crossed name
-by reading the tube — the failure that put this on #22 in the first place was a calcemia entered where
-the doctor asked calciuria. **Stickers are out** (*"son muy caros"*), so every number is written by hand
-with a fibrón, which is a standing constraint on the length of anything we number. The counter resets
-monthly and that is safe because *"nada queda más de una semana."*
-
-The model is better for it: a rejected tube and the one that replaced it are now distinguishable on the
-bench without the system.
+**Each container has its own number** — `471-MG-1`, `471-MG-2` — written by hand with a fibrón. The
+scheme is in *The Ficha and the orden*. It reverts this ticket's original cut (*the orden's number goes
+on every container*), overturned by [#22](https://github.com/FrancoLedArg/lab/issues/22) with this
+section's own centrifuge scene. A rejected tube and the one that replaced it are now distinguishable on
+the bench without the system.
 
 ### The links
 
@@ -197,7 +303,7 @@ bench without the system.
   replacement is *added*. The container in use is the last one not rejected.
 - **A muestra is created at the draw.** Before that, *having no muestra* is what "not drawn yet"
   means — no placeholder rows, nothing to delete when a patient never gives the sample.
-- **One draw can become several muestras.** Staff correct the orden's container list when the blood
+- **One draw can become several muestras.** Staff correct the Ficha's container list when the blood
   is split. The placeholder tube is never a record.
 
 ### Before the draw: sample instructions
@@ -222,25 +328,25 @@ gets dismissed with whatever is first in the list, and that answer then poisons 
    (WhatsApp or email, [#4](https://github.com/FrancoLedArg/lab/issues/4)) — editable, not skippable.
    In the alternative the rejection is done and the notice is optional, so the notice is what gets
    skipped on a busy morning, invisibly.
-3. **Only the practices attached to that container stop.** Their recorded-but-unapproved values can
-   no longer be approved or printed; they stay in the record, because Ley 26.529 art. 16 keeps them.
+3. **Only the practices attached to that container stop.** Their entered-but-unvalidated values can
+   no longer be validated or printed; they stay in the record, because Ley 26.529 art. 16 keeps them.
    If the Bioquímico wants to keep a value, the tube was never rejected — it was usable with a
    quality note.
-4. **The orden stays alive and is not billed again.** Ana agreed to five practices and paid once; a
+4. **The Ficha stays alive and is not billed again.** Ana agreed to five practices and paid once; a
    bad tube does not change what she agreed to.
-5. **The orden sits in a waiting-for-re-draw list** until a replacement is drawn — the lab notifies,
+5. **The práctica sits in a waiting-for-re-draw list** until a replacement is drawn — the lab notifies,
    the patient decides, and the list is what stops the case going quiet for two months.
-6. **Nothing closes by timer.** If Ana never returns, staff mark the práctica *not done — muestra no
-   recibida* by hand. Auto-closing would have the app decide a refund by scheduled job.
+6. **Nothing closes by timer.** If Ana never returns, staff mark the práctica **anulada** — *el paciente no
+   volvió* — by hand ([#22](https://github.com/FrancoLedArg/lab/issues/22)). Auto-closing would have the app decide a refund by scheduled job.
 
 ### When it is too late to reject
 
-Rejection is free at any moment — at the chair, at the split, mid-processing — up to approval.
-**Approval is not only a signature**: the Bioquímico may adjust a value on their own criteria if the
-machine looks wrong, so editing before approval is ordinary work.
+Rejection is free at any moment — at the chair, at the split, mid-processing — up to validation.
+**Validation is not only a signature**: the Bioquímico may adjust a value on their own criteria if the
+machine looks wrong, so editing before validation is ordinary work.
 
-**The lock starts at delivery, not at approval.** Until the report leaves the lab, un-approve →
-correct → re-approve is normal work; nothing has left under a professional's name and nobody has
+**The lock starts at delivery, not at validation.** Until the report leaves the lab, un-validate →
+correct → re-validate is normal work; nothing has left under a professional's name and nobody has
 been misled. Once Ana has the PDF, an amendment
 ([#23](https://github.com/FrancoLedArg/lab/issues/23)) is the only path.
 
@@ -262,7 +368,6 @@ lab is free to overwrite.
 | Cut | Why |
 |---|---|
 | `received_at` and a `received` state | Nobody records that a tube reached the bench. The field would be a timestamp the app invented. |
-| ~~A number on the muestra~~ | **Reverted by [#22](https://github.com/FrancoLedArg/lab/issues/22)** — each container has its own number. |
 | `replaces` on a re-drawn muestra | The append-only list already holds it, in date order — and art. 16 forces us to keep that link anyway. Two mechanisms, one job. |
 | Aliquot lineage, chain of custody | The placeholder tube has no number and no life after the split. `ponytail:` a muestra records the container the analysis used, not where the material came from. One field to add later, not a redesign. |
 | Barcodes, storage location, centrifugation steps, stability clocks, volume tracking | None of it happens on paper today. The lab writes a number on a tube and the tube is walked to the bench. |
@@ -292,7 +397,7 @@ Staff **change** anything — a patient's name, a forgotten TSH, a Measurement. 
 every change keeps the old value, the person and the time. The reason is not the law: *the fix can
 also be wrong*, and then the lab needs the value from before the fix.
 
-We never print a Bioquímico who did not approve. Both rules exist so **the responsible person is
+We never print a Bioquímico who did not validate. Both rules exist so **the responsible person is
 always findable** — which is what makes *we only give the lab a tool* true. The patient talks to the
 Bioquímico, not to us, and that only works while the record can name one.
 
@@ -330,17 +435,17 @@ would reuse one, and we would have the separation in the schema and not in reali
 
 | Role | What they do |
 |---|---|
-| **Técnico** | Registers patients, takes ordens, draws, records and rejects muestras, enters results. **Cannot approve.** |
-| **Bioquímico** | Everything a Técnico does, **and approves**. Sets the total on an orden. |
+| **Técnico** | Registers patients, opens Fichas, draws, records and rejects muestras, enters results. **Cannot validate.** |
+| **Bioquímico** | Everything a Técnico does, **and validates**. Sets the total on a Ficha. |
 
-**Approval is the only gate in the product.** Enforced as *product*, not as law — it survives the law's
+**Validation is the only gate in the product.** Enforced as *product*, not as law — it survives the law's
 repeal, so it passes ADR 0001's admission test. It is a **role gate**: we never check a matrícula.
 
 **Any staff member may reject a muestra**, Técnico included — haemolysis is a physical fact, not a
 professional judgement, and a Bioquímico gate stalls a dead tube exactly when they are out
 ([#19](https://github.com/FrancoLedArg/lab/issues/19)).
 
-**Nobody reviews an orden a Técnico entered.** A review step nobody asked for becomes a button pressed
+**Nobody reviews a Ficha a Técnico entered.** A review step nobody asked for becomes a button pressed
 without reading.
 
 ### Administrativo is a real role and not a v1 user
@@ -352,17 +457,18 @@ with its own screens and its own money flow, together.
 What that person spends the day on is answering *"¿ya está?"* on the phone. The patient-facing version
 — a WhatsApp assistant — is post-v1, and the channel it needs already exists for report delivery.
 
-### A report names two different people
+### A report names three different people
 
-Conflating them breaks the first day a second lab exists:
+Conflating the first two breaks the first day a second lab exists:
 
 | | Who | Scope |
 |---|---|---|
 | **Director técnico** | the lab's director, with **that lab's** matrícula, phone and address | per **lab**, fixed |
-| **Approving Bioquímico** | whoever approved **that** result | per **result** |
+| **Validating Bioquímico** | whoever validated **that** result | per **result** |
+| **Médico solicitante** | the doctor who wrote **that** orden ([#22](https://github.com/FrancoLedArg/lab/issues/22)) | per **orden** |
 
 Usually the same person; sometimes not. When one bioquímica covers for the other over holidays the
-lab's director técnico has not changed, and the report may not claim she approved what she did not.
+lab's director técnico has not changed, and the report may not claim she validated what she did not.
 The second column is what ADR 0001's floor — *the record never names the wrong person* — is about.
 
 ### Deliberate v1 cuts
@@ -388,8 +494,8 @@ Bacteriología goes to Gornitz, which has never heard of us; a hormone goes to o
 Designing the handoff between our two labs *first* and bolting the external case on afterwards gives
 two mechanisms for one job — and **the external case is the common one.**
 
-**The two ordens are never linked**, even when both labs run this software. The receiving lab
-registers its own work on its own orden and the two records do not know about each other. Nothing
+**The two Fichas are never linked**, even when both labs run this software. The receiving lab
+registers its own work on its own Ficha and the two records do not know about each other. Nothing
 about the patient crosses: *shares nothing* means nothing, not nothing-except.
 
 ### What the flag buys
@@ -420,7 +526,7 @@ Both pass ADR 0001's admission test — the lab wants them with the law repealed
 | Cut | Why |
 |---|---|
 | A cross-tenant handoff between our two labs | A tube that travels by car does not need a two-sided protocol, and the bioquímica is in both labs supervising it herself. |
-| Sending the patient's sex and age to the receiving lab | Designed, then deleted with the handoff. It was needed only because the receiving lab would interpret the range; with manual entry the lab that ran it marks its own range on its own orden. |
+| Sending the patient's sex and age to the receiving lab | Designed, then deleted with the handoff. It was needed only because the receiving lab would interpret the range; with manual entry the lab that ran it marks its own range on its own Ficha. |
 | The inter-lab account | Lab B bills Lab A monthly. Real, and not money the patient pays. |
 | A `Derivation` entity | It is a flag and a name on a row that already exists. |
 
@@ -447,7 +553,7 @@ the strongest pass of ADR 0001's admission test anywhere in this model.
 | dates | the one staff type and the one the server records, as everywhere |
 | comprobante | an optional photo — **stored, never read** |
 
-**An append-only list on the orden.** Ana pays 25.000 at the draw and 40.000 at pickup: two Payments. A
+**An append-only list on the Ficha.** Ana pays 25.000 at the draw and 40.000 at pickup: two Payments. A
 Payment is never edited; a wrong one is corrected by adding the correction.
 
 The photo is **evidence, not data entry**. Typing `25000` takes three seconds, and what protects the
@@ -459,7 +565,7 @@ nothing and fails in the worst way: a misread number that nobody checks. (Same f
 
 ### The total, and the balance
 
-The orden carries a **total**. The **balance is a subtraction** — total minus its Payments, computed and
+The Ficha carries a **total**. The **balance is a subtraction** — total minus its Payments, computed and
 never stored. 65.000, 25.000 in, 40.000 to go.
 
 **The total is the Bioquímico's number.** The app computes a suggestion; she rounds 62.300 up to 65.000,
@@ -471,7 +577,14 @@ different direction each time. That is the spine of the product, not a coinciden
 
 ### What the app computes
 
-Each OrderedPractice records whether the obra social **authorized** it — per práctica, not per orden.
+Each OrderedPractice carries its own obra social and its **authorization** — per práctica, not per
+orden. The authorization is **`pending`**, **`authorized`** or **`not authorized`**
+([#22](https://github.com/FrancoLedArg/lab/issues/22)): the draw often happens before the answer
+arrives. **Pending blocks nothing**, delivery included. The patient is the one who chases it, so pending
+and not authorized both raise *talk to the patient*. If it never resolves, someone marks it not
+authorized and the lab absorbs the cost; how a pending práctica is valued in the suggestion is not
+decided, and the total is the Bioquímico's number either way.
+
 Then, against the UB coefficient the catalog already holds:
 
 | | Valued at |
