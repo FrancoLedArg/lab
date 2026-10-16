@@ -25,7 +25,11 @@ _Avoid_: branch, sucursal, sede, tenant (in conversation)
 One person, however many labs they work in.
 
 **Membership**:
-A User's role at one Lab.
+A User's role at one Lab. Ended, never deleted.
+
+**Sistema**:
+The User for what nobody did by hand — the automatic reply to a patient's message. A member of both
+Labs; no person logs in as it.
 
 **Técnico**:
 The role that registers, draws, rejects and enters results. Cannot validate.
@@ -155,8 +159,8 @@ _Avoid_: coseguro (unless the bono says so)
 2. **A Ficha opens**, with one Orden per paper and one OrderedPractice per práctica on it.
 3. **The draw** creates the Muestras. Money may come in at any point; it gates nothing.
 4. **Results are entered**, then **validated** by a Bioquímico.
-5. **A sheet leaves** — partial or complete — and what is on it locks. The complete one sends itself
-   ([#17](https://github.com/FrancoLedArg/lab/issues/17)).
+5. **A sheet leaves** — partial or complete — and what is on it locks. It leaves by a person pressing *enviar*
+   ([#28](https://github.com/FrancoLedArg/lab/issues/28)).
 6. **A wrong result that left** is corrected; the Orden is back in *para entregar*.
 
 ### An OrderedPractice's states
@@ -196,12 +200,13 @@ number**: one per Lab, a new line used only by the app, never a phone in someone
 rejection notice ([#19](https://github.com/FrancoLedArg/lab/issues/19)) and the code confirmed at the
 counter ([#6](https://github.com/FrancoLedArg/lab/issues/6)) leave from the same number.
 
-- **The complete sheet sends itself** the moment its last result is validated. Validating is already
-  the Bioquímico's review; a *send* button after it would be a second gate pressed without reading
-  ([#7](https://github.com/FrancoLedArg/lab/issues/7)).
-- **A button stays only where there is a decision**: a partial sheet (Ana wants the hemograma now), a
-  corrección (someone talks to Ana first, [#23](https://github.com/FrancoLedArg/lab/issues/23)), and
-  *entrega física*, which prints.
+- ~~**The complete sheet sends itself** the moment its last result is validated~~ — **overturned by
+  [#28](https://github.com/FrancoLedArg/lab/issues/28)**: **every sheet leaves by a person pressing
+  *enviar***. The user's reason: safer, and no confusion about who sent it. A sheet nobody sent waits
+  in *para entregar* on the home screen, which already existed. So the app sends nothing by itself
+  but the automatic reply.
+- A partial sheet, a corrección ([#23](https://github.com/FrancoLedArg/lab/issues/23)) and
+  *entrega física* (which prints) were already a button; now everything is.
 - **If WhatsApp refuses it**, the alerta *no se pudo enviar* comes up. No retry — a wrong number stays
   wrong. Someone phones Ana, fixes the number and sends again, or prints. The result left anyway: the
   sheet was generated.
@@ -226,6 +231,7 @@ phone belongs to two patients (a mother and her son), the alerta names both.
 |---|---|
 | A patient portal and a link instead of the file | The doctor could not open it. A second app with its own login, for nothing the file does not do. |
 | A password on the PDF | Same reason: the doctor receives it forwarded. |
+| The complete sheet sending itself | Cut by [#28](https://github.com/FrancoLedArg/lab/issues/28): a person presses *enviar*. |
 | Answering from the app | That is an inbox — threads, photos, audio. It is the door of the WhatsApp assistant, post-v1. |
 | Automatic retries | A refused number is a wrong number; retrying does not fix it. |
 
@@ -711,7 +717,14 @@ both. They share **nothing** — not patients, not catalog, not prices, not rang
 
 A **User** is a person, and one person is one User however many labs they work in. A **Membership** is
 that person's role at one lab. The bioquímica who works at both has **one login and two memberships**,
-and switches labs inside the app.
+and switches labs inside the app. A Membership that ends is **ended, never deleted**: the record keeps
+naming who validated after they leave.
+
+**Nobody holds another person's credential.** There are no passwords: a User logs in with a 4-digit
+code sent by WhatsApp, like the code confirmed at the counter. Accounts are created by hand
+([ADR 0002](docs/adr/0002-v1-is-two-labs.md)), and whoever set a password for a Bioquímico could
+validate under her name ([#28](https://github.com/FrancoLedArg/lab/issues/28),
+[ADR 0004](docs/adr/0004-rls-wiring.md)).
 
 Two logins for one human would put two names in the record for one person, and the floor of ADR 0001
 exists to stop exactly that. Nor would the split survive contact: nobody keeps two passwords, she
