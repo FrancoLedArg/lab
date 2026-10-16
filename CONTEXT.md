@@ -11,6 +11,48 @@ English.
 *Cargar* means **enter / load data**, never money — use *register* / *enter* for data entry and
 reserve *charge* / *bill* for money.
 
+## Correcting what already left — settled by [#23](https://github.com/FrancoLedArg/lab/issues/23)
+
+### Each result locks when it first leaves
+
+Not the sheet. The selenio takes more than a week, and the doctor can follow Ana with the other 16
+results meanwhile, so **a sheet may leave in parts**: the 16 leave and lock, the selenio prints as
+***pendiente*** and stays freely editable, and the last send is the **complete sheet** — all 17. This
+replaces #22's *each Orden locks when its report leaves*.
+
+Before a result leaves, un-validate → correct → re-validate is ordinary work ([#19](https://github.com/FrancoLedArg/lab/issues/19)).
+After, the only path is a **correction**.
+
+### A correction
+
+The Tuesday glucemia left on WhatsApp; Wednesday the Bioquímico finds the tubes were crossed.
+
+- **Any Bioquímico** corrects it. It is a re-validation, so the role gate from [#7](https://github.com/FrancoLedArg/lab/issues/7) is the whole rule.
+- It asks for a **short free-text reason** — the lab writes one down today. The old value, the person
+  and the time are kept anyway (ADR 0001's floor).
+- **Nothing is sent by itself.** The Orden reappears in *para entregar*, because someone phones Ana
+  first.
+- **The new sheet is always marked**: the header says it is a correction, and a mark sits beside the
+  result that changed. The old value does not print; it lives in the record. This settles ADR 0001's
+  *the lab chooses* — the lab marks it, and there is no second lab asking for a clean sheet.
+- **A patient-data fix** — Ana's surname was misspelled on a sheet that left — **also prints marked**.
+  One rule: if anything changes on a sheet that left, the next one is marked. *Provisional*: revisit
+  once the labs use it.
+
+What is **not** a correction, so prints no mark: a *pendiente* gaining its value, a forgotten práctica
+added after a partial send, and a *pendiente* that is anulada — which prints ***no realizado***, the one
+exception to *an anulada práctica is never printed*, because the doctor already saw it coming.
+
+### Deliberate v1 cuts
+
+| Cut | Why |
+|---|---|
+| A *blocked / under review* state, a 5-business-day clock, a disputes worklist | It came from reading Ley 25.326 art. 16, not from the lab. When Ana says her name is wrong, staff fix it and send the sheet again. Fails ADR 0001's admission test. |
+| Printing the old value | The record holds it. The sheet says *what* changed, not what it was. |
+| Auto-sending the corrected sheet | Someone talks to the patient first. |
+
+---
+
 ## The Ficha and the orden — settled by [#22](https://github.com/FrancoLedArg/lab/issues/22)
 
 ### Four levels
@@ -67,10 +109,11 @@ The Ficha number is **internal**. Patients are found by DNI, so nothing requires
 
 ### Changing a Ficha
 
-- **Adding a práctica is open until its orden's report leaves.** It needs a muestra — the existing tube
+- **Adding a práctica is open until the orden's complete sheet leaves** — a partial send does not close
+  it ([#23](https://github.com/FrancoLedArg/lab/issues/23)). It needs a muestra — the existing tube
   if it serves, a new draw if not. #19's append-only list covers it.
-- **Removing a práctica is ungated, at any moment before delivery.** After delivery it is an amendment
-  ([#23](https://github.com/FrancoLedArg/lab/issues/23)): the paper has left the lab.
+- **Removing a práctica is ungated until its result leaves.** After that it is a correction
+  ([#23](https://github.com/FrancoLedArg/lab/issues/23)): the value has left the lab.
 - **A substitution is a removal plus an addition.** No `replaces` field — the second time that cut won,
   after #19's re-drawn muestras.
 
@@ -92,12 +135,15 @@ already entered**. If the vitamina D was already run, the lab absorbs the cost.
 asked for an orina completa and she never brought the urine — the answer was the same: no line. That
 overturns #19's proposal that the report print *"orina completa: muestra no recibida"*. Nothing anuls by timer
 ([#19](https://github.com/FrancoLedArg/lab/issues/19)).
+**One exception** ([#23](https://github.com/FrancoLedArg/lab/issues/23)): a práctica that already
+printed as *pendiente* on a partial send prints ***no realizado*** — the doctor saw it coming.
 
 ### Delivery and the lock
 
-**Each Orden locks when its report leaves**, which is #19's *lock at delivery* landing per Orden. The
-lab usually sends everything together, but that is its call with each patient: if Ana wants the
-hemograma now, that sheet leaves and locks, and the TSH stays editable until Friday.
+~~**Each Orden locks when its report leaves**~~ — **overturned by [#23](https://github.com/FrancoLedArg/lab/issues/23)**:
+**each result locks when it first leaves**, and a sheet may leave in parts. The lab usually sends
+everything together, but that is its call with each patient: if Ana wants the hemograma now, that
+sheet leaves, and the TSH stays editable until Friday.
 
 ### What staff look at: pendientes and alertas
 
@@ -347,8 +393,9 @@ machine looks wrong, so editing before validation is ordinary work.
 
 **The lock starts at delivery, not at validation.** Until the report leaves the lab, un-validate →
 correct → re-validate is normal work; nothing has left under a professional's name and nobody has
-been misled. Once Ana has the PDF, an amendment
-([#23](https://github.com/FrancoLedArg/lab/issues/23)) is the only path.
+been misled. Once a value has left the lab, a correction
+([#23](https://github.com/FrancoLedArg/lab/issues/23)) is the only path — and since #23 that lock is
+per result, not per report.
 
 The driver is adoption, not tidiness: a Bioquímico who cannot fix a two-minute-old mistake without a
 permanent mark keeps a paper notebook instead, and an app the professional avoids records nothing at
@@ -403,8 +450,9 @@ Bioquímico, not to us, and that only works while the record can name one.
 
 ### 8. What goes to the patient is not what the lab holds
 
-The lab decides what prints; the record keeps everything. A corrected report prints clean or prints
-*rectificado* — the lab's call, and version 1 survives either way. Staff type `drawn_at`; the server
+The lab decides what prints; the record keeps everything. A corrected report ~~prints clean or prints
+*rectificado* — the lab's call~~ **always prints marked** — the lab's call, made on
+[#23](https://github.com/FrancoLedArg/lab/issues/23) — and version 1 survives either way. Staff type `drawn_at`; the server
 keeps `recorded_at`.
 
 ---

@@ -64,7 +64,9 @@ The floor holds regardless of tier, and regardless of what a lab asks for.
 The lab decides what prints. The record keeps everything. The same split, three times:
 
 - A corrected report prints clean, or prints *rectificado*. **The lab chooses.** Version 1 survives
-  either way.
+  either way. *[#23](https://github.com/FrancoLedArg/lab/issues/23): the lab chose — a correction
+  always prints marked. Under ADR 0002 there is no second lab to want it clean, so it is not a
+  setting.*
 - Before delivery, un-approve → correct → re-approve leaves no mark on the paper. The record still
   keeps every version.
 - Staff **type** the date of the draw — a lab entering Saturday's work on Monday must be able to say
