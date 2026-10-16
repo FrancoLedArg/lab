@@ -112,6 +112,14 @@ A result **leaves** when a sheet carrying it is generated to be handed over — 
 WhatsApp. From then on it is locked.
 _Avoid_: delivered (for the lock), released
 
+**Lab number**:
+The Lab's WhatsApp line, used only by the app. Sends sheets, codes and rejection notices; answers
+nobody.
+_Avoid_: the lab's phone (that is a person's)
+
+**Visto**:
+The mark that closes an alerta for a patient's message. Who, and when.
+
 **Pendiente**:
 An OrderedPractice not yet on a sheet. Prints as *pendiente* on a partial sheet.
 
@@ -147,7 +155,8 @@ _Avoid_: coseguro (unless the bono says so)
 2. **A Ficha opens**, with one Orden per paper and one OrderedPractice per práctica on it.
 3. **The draw** creates the Muestras. Money may come in at any point; it gates nothing.
 4. **Results are entered**, then **validated** by a Bioquímico.
-5. **A sheet leaves** — partial or complete — and what is on it locks.
+5. **A sheet leaves** — partial or complete — and what is on it locks. The complete one sends itself
+   ([#17](https://github.com/FrancoLedArg/lab/issues/17)).
 6. **A wrong result that left** is corrected; the Orden is back in *para entregar*.
 
 ### An OrderedPractice's states
@@ -168,6 +177,57 @@ sin extraer → para procesar → para validar → para entregar → entregada
 
 The Ficha has **no state of its own**. Its alertas come from the promised date and the
 authorizations (see *What staff look at*).
+
+---
+
+## Sending the sheet — settled by [#17](https://github.com/FrancoLedArg/lab/issues/17)
+
+### The file, not a link
+
+Ana forwards the PDF to her doctor on WhatsApp. That is what settled it: a link behind a code would
+not open for the doctor, who has no login in v1. So **the PDF itself is sent**, there is **no patient
+portal**, and the PDF has **no password** — a DNI-locked file fails the doctor the same way.
+
+### The app sends it
+
+Today the sheet is printed to PDF, emailed to a staff member's phone, and sent from **their personal
+WhatsApp** — and the patients then write to that person. So the app sends it, from the **lab
+number**: one per Lab, a new line used only by the app, never a phone in someone's hand. The
+rejection notice ([#19](https://github.com/FrancoLedArg/lab/issues/19)) and the code confirmed at the
+counter ([#6](https://github.com/FrancoLedArg/lab/issues/6)) leave from the same number.
+
+- **The complete sheet sends itself** the moment its last result is validated. Validating is already
+  the Bioquímico's review; a *send* button after it would be a second gate pressed without reading
+  ([#7](https://github.com/FrancoLedArg/lab/issues/7)).
+- **A button stays only where there is a decision**: a partial sheet (Ana wants the hemograma now), a
+  corrección (someone talks to Ana first, [#23](https://github.com/FrancoLedArg/lab/issues/23)), and
+  *entrega física*, which prints.
+- **If WhatsApp refuses it**, the alerta *no se pudo enviar* comes up. No retry — a wrong number stays
+  wrong. Someone phones Ana, fixes the number and sends again, or prints. The result left anyway: the
+  sheet was generated.
+
+### What Ana sees
+
+The text is *"Hola Ana, te enviamos tus resultados. — Laboratorio X"* and the file is
+`Resultados-0471.pdf`, the Ficha's number. **Nothing on the lock screen names a study**: the
+notification shows the text and the file name, and an `HIV.pdf` on a locked phone is health data.
+Two Ordenes, two PDFs, the same text; the doctor's name is inside.
+
+### When Ana answers
+
+Nobody answers on WhatsApp. Ana gets an automatic reply at once — *"Recibimos tu mensaje. Si hace
+falta, el laboratorio se comunica con vos."* — and her message comes up in the app as an alerta, with
+its text. Staff mark it **visto**. If it needs an answer, a person gives it outside the app. When a
+phone belongs to two patients (a mother and her son), the alerta names both.
+
+### Deliberate v1 cuts
+
+| Cut | Why |
+|---|---|
+| A patient portal and a link instead of the file | The doctor could not open it. A second app with its own login, for nothing the file does not do. |
+| A password on the PDF | Same reason: the doctor receives it forwarded. |
+| Answering from the app | That is an inbox — threads, photos, audio. It is the door of the WhatsApp assistant, post-v1. |
+| Automatic retries | A refused number is a wrong number; retrying does not fix it. |
 
 ---
 
@@ -336,6 +396,8 @@ The **alertas**:
 |---|---|
 | **Due** — the promised date is today or tomorrow, or has passed, and the report has not left | the promised date |
 | **Talk to the patient** — an authorization is pending or not authorized | the authorization, until someone marks *avisado* |
+| **A patient wrote** — a message reached the lab number | the message, until someone marks *visto* ([#17](https://github.com/FrancoLedArg/lab/issues/17)) |
+| **No se pudo enviar** — WhatsApp refused a sheet | the refusal, until the sheet is sent again or printed ([#17](https://github.com/FrancoLedArg/lab/issues/17)) |
 
 A rejected tube raises no alerta: **rejecting is notifying** ([#19](https://github.com/FrancoLedArg/lab/issues/19)),
 so the message left with the rejection and the práctica waits in *esperando re-extracción*.
