@@ -11,6 +11,166 @@ English.
 *Cargar* means **enter / load data**, never money — use *register* / *enter* for data entry and
 reserve *charge* / *bill* for money.
 
+## Language — integrated by [#6](https://github.com/FrancoLedArg/lab/issues/6)
+
+One or two lines per term. The sections below hold the reasons.
+
+### The lab and its people
+
+**Lab**:
+One **habilitación**. The tenant. v1 runs two, and they share nothing.
+_Avoid_: branch, sucursal, sede, tenant (in conversation)
+
+**User**:
+One person, however many labs they work in.
+
+**Membership**:
+A User's role at one Lab.
+
+**Técnico**:
+The role that registers, draws, rejects and enters results. Cannot validate.
+
+**Bioquímico**:
+The role that does everything a Técnico does, and validates. Sets the Ficha's total.
+_Avoid_: biochemist, approver
+
+**Director técnico**:
+The Lab's director, printed on every sheet with that Lab's matrícula. Per Lab, fixed — not the
+validating Bioquímico.
+
+### The visit
+
+**Patient**:
+A person known to one Lab, found by **DNI**. A patient of both labs is two Patients.
+
+**Entrega física**:
+A Patient with no WhatsApp. Receives paper only; no PDF goes to them by any channel.
+
+**Ficha**:
+One Patient's visit: its number, the promised date, and the money.
+_Avoid_: orden, order, visit (for this)
+
+**Orden**:
+One doctor's paper. Holds the médico solicitante and gets **one sheet**.
+_Avoid_: pedido, receta; *order* for the visit
+
+**Médico solicitante**:
+The doctor who wrote the Orden. A per-lab record grown from use.
+
+### The catalog and the result
+
+**Practice**:
+A line in one Lab's menu, usually pointing at an NBU row.
+_Avoid_: estudio, study, determinación
+
+**OrderedPractice**:
+One Practice on one Orden. With its Measurements, it **is** the result.
+_Avoid_: Result (as an entity), study instance
+
+**Analyte**:
+One thing a Lab measures, with its unit and its range set. Belongs to the Lab, not to a Practice.
+
+**Measurement**:
+One measured line for one Patient, carrying a copy of the range set as it stood.
+
+**Range set**:
+An Analyte's list of normal ranges by sex and age. Ships suggested; a Bioquímico confirms it once.
+
+**NBU**:
+The shared national list of 1,349 practices. No Lab changes any of it.
+
+**Derivación**:
+An OrderedPractice another lab runs: a flag and that lab's name. The value is typed in by hand.
+_Avoid_: referral, Derivation (as an entity)
+
+### The tube
+
+**Muestra**:
+One working container — *suero*, *EDTA*, *orina* — with its own handwritten number (`471-MG-1`).
+_Avoid_: sample (in conversation), draw, tube
+
+**Rejected**:
+A Muestra nobody may use. Rejecting notifies the Patient and stops only that container's practices.
+
+**Anulada**:
+An OrderedPractice removed, with actor, time and reason. Never deleted, never billed.
+_Avoid_: cancelled, deleted
+
+### Validation, delivery, correction
+
+**Validar**:
+A Bioquímico signs an OrderedPractice's values. The only gate in the product.
+_Avoid_: approve
+
+**Sheet**:
+One PDF for one Orden at one moment — partial, complete, or corrected. Generated once, stored,
+never re-rendered.
+_Avoid_: report (when you mean one send), informe final
+
+**Salir**:
+A result **leaves** when a sheet carrying it is generated to be handed over — printed or sent by
+WhatsApp. From then on it is locked.
+_Avoid_: delivered (for the lock), released
+
+**Pendiente**:
+An OrderedPractice not yet on a sheet. Prints as *pendiente* on a partial sheet.
+
+**Corrección**:
+A new validated value for a result that already left. Asks for a reason; the next sheet prints marked.
+_Avoid_: amendment, rectificación, edit
+
+**No realizado**:
+What a sheet prints for a *pendiente* that was later anulada.
+
+### Money
+
+**Payment**:
+Money received: amount, medio, who received it. Append-only on the Ficha.
+
+**Total**:
+What the Patient owes. The Bioquímico's number; the app only suggests it.
+_Avoid_: price (for the total)
+
+**Authorization**:
+An obra social's answer for one OrderedPractice: `pending`, `authorized` or `not authorized`.
+
+**UB**:
+Unidad Bioquímica. The coefficient lives in the NBU row; its peso value is typed per obra social.
+
+**Copago**:
+The patient's share, typed off the bono. Never computed.
+_Avoid_: coseguro (unless the bono says so)
+
+## The flow, end to end — [#6](https://github.com/FrancoLedArg/lab/issues/6)
+
+1. **Ana arrives** with one or more doctor's papers. Found by DNI, or registered.
+2. **A Ficha opens**, with one Orden per paper and one OrderedPractice per práctica on it.
+3. **The draw** creates the Muestras. Money may come in at any point; it gates nothing.
+4. **Results are entered**, then **validated** by a Bioquímico.
+5. **A sheet leaves** — partial or complete — and what is on it locks.
+6. **A wrong result that left** is corrected; the Orden is back in *para entregar*.
+
+### An OrderedPractice's states
+
+**Derived from the data, never stored.**
+
+```
+sin extraer → para procesar → para validar → para entregar → entregada
+                                                  ↑               │
+                                                  └─ corrección ──┘
+```
+
+| Off the line | When |
+|---|---|
+| *esperando re-extracción* | every Muestra on it is rejected |
+| *esperando a Gornitz* | a derivación with no value yet |
+| *anulada* | removed by hand; ends the line |
+
+The Ficha has **no state of its own**. Its alertas come from the promised date and the
+authorizations (see *What staff look at*).
+
+---
+
 ## Correcting what already left — settled by [#23](https://github.com/FrancoLedArg/lab/issues/23)
 
 ### Each result locks when it first leaves
@@ -83,9 +243,24 @@ the clínico's hemograma and the endocrinólogo's TSH, pays once and receives tw
 
 ### Patient
 
-**Found by DNI**, falling back to the name. The DNI is optional — a baby without one yet is registered
-under the baby's own name, never the mother's DNI — and **unique within a lab** when present. A patient
-of both labs is two patients: the labs share nothing.
+**Found by DNI.** ~~The DNI is optional — a baby without one yet is registered under the baby's own
+name, never the mother's DNI~~ — **overturned by [#6](https://github.com/FrancoLedArg/lab/issues/6)**:
+the lab needs the DNI to process a muestra, so it is **required** and **unique within a lab**. It is
+**free text, never checked** — a foreign patient's passport fits. A patient of both labs is two
+patients: the labs share nothing.
+
+| Field | Why |
+|---|---|
+| **name** | |
+| **DNI** | finding a returning patient; the lab needs it to process |
+| **date of birth** | the range line depends on age. Staff rarely ask it today and remember the baby by eye; the app cannot. |
+| **sex** | the range line depends on sex. When the DNI says **X**, the Bioquímico picks the line at validation. |
+| **phone** | required. **Confirmed at the counter**: a WhatsApp with a 4-digit code the patient reads out. The same message is the patient's yes to receiving results by WhatsApp ([#4](https://github.com/FrancoLedArg/lab/issues/4)). |
+
+Staff call numbers that never answer — that is what the code stops. A patient **with no WhatsApp** is
+marked ***entrega física***: paper only, and no PDF goes to them by any channel. **Email is out of v1.**
+
+No address: nobody asks for it today.
 
 ### Médico solicitante
 
@@ -371,7 +546,8 @@ gets dismissed with whatever is first in the list, and that answer then poisons 
 1. **Any staff member may reject.** Haemolysis is a physical fact, not a professional judgement, and
    a Bioquímico gate stalls a dead tube exactly when they are out. Actor, time and reason recorded.
 2. **Rejecting is notifying.** Picking the reason sends the patient a message on the report channel
-   (WhatsApp or email, [#4](https://github.com/FrancoLedArg/lab/issues/4)) — editable, not skippable.
+   (WhatsApp, [#4](https://github.com/FrancoLedArg/lab/issues/4); email left v1 on [#6](https://github.com/FrancoLedArg/lab/issues/6),
+   and an *entrega física* patient is phoned) — editable, not skippable.
    In the alternative the rejection is done and the notice is optional, so the notice is what gets
    skipped on a busy morning, invisibly.
 3. **Only the practices attached to that container stop.** Their entered-but-unvalidated values can
