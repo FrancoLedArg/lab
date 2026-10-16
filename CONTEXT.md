@@ -323,6 +323,15 @@ patients: the labs share nothing.
 | **sex** | the range line depends on sex. When the DNI says **X**, the Bioquímico picks the line at validation. |
 | **phone** | required. **Confirmed at the counter**: a WhatsApp with a 4-digit code the patient reads out. The same message is the patient's yes to receiving results by WhatsApp ([#4](https://github.com/FrancoLedArg/lab/issues/4)). |
 
+**The code message is the consent** ([#16](https://github.com/FrancoLedArg/lab/issues/16)). The PDF crosses Meta's
+servers, which may be abroad — the AAIP treats that as an international transfer, lawful with the
+patient's express consent. So the message says it in one breath: *"Laboratorio X: tu código es 4821.
+Al dictarlo en el mostrador aceptás recibir tus resultados por WhatsApp. WhatsApp es un servicio de
+Meta y tus resultados pasan por sus servidores, que pueden estar fuera de Argentina. Más información:
+[link]"* — the link is one page per lab: who is responsible, and how to see, correct, or stop. The
+record keeps who attended, when, and **which version of the text** was sent. No code, no consent:
+*entrega física*. *Pending the lawyer's review of the text.*
+
 Staff call numbers that never answer — that is what the code stops. A patient **with no WhatsApp** is
 marked ***entrega física***: paper only, and no PDF goes to them by any channel. **Email is out of v1.**
 
