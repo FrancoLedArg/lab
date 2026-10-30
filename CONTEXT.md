@@ -25,7 +25,11 @@ _Avoid_: branch, sucursal, sede, tenant (in conversation)
 One person, however many labs they work in.
 
 **Membership**:
-A User's role at one Lab. Ended, never deleted.
+A User's role at one Lab, and whether they are its Dueño. Ended, never deleted.
+
+**Dueño**:
+A mark on a Membership, apart from the role. Sees the Lab's money from obras sociales.
+_Avoid_: owner (it is also a Postgres role, ADR 0004)
 
 **Sistema**:
 The User for what nobody did by hand — the automatic reply to a patient's message. A member of both
@@ -152,6 +156,12 @@ Unidad Bioquímica. The coefficient lives in the NBU row; its peso value is type
 **Copago**:
 The patient's share, typed off the bono. Never computed.
 _Avoid_: coseguro (unless the bono says so)
+
+**Presentación**:
+One obra social's authorized OrderedPractices for one month, at one Lab. The app assembles it.
+
+**Débito**:
+A presented práctica the Colegio did not recognize. A loss: never presented again.
 
 ## The flow, end to end — [#6](https://github.com/FrancoLedArg/lab/issues/6)
 
@@ -756,6 +766,17 @@ professional judgement, and a Bioquímico gate stalls a dead tube exactly when t
 **Nobody reviews a Ficha a Técnico entered.** A review step nobody asked for becomes a button pressed
 without reading.
 
+### Dueño is a mark, not a role — [#8](https://github.com/FrancoLedArg/lab/issues/8)
+
+A lab's owner need not be a Técnico or a Bioquímico. So **Dueño is a mark on the Membership, beside the
+role**, and a Membership may carry the mark with no role at all. In v1 it gates one thing: **the money
+from obras sociales** — the Presentaciones, the fecha de pago, the cobro, *ya cobré*. A Dueño with no
+role sees no Fichas and no results; a Técnico or a Bioquímico without the mark sees no Presentación. In
+both v1 labs the bioquímica carries both.
+
+#28 also named the owner as the one who invites people to a lab. That is not v1: Users and Memberships
+are created by hand ([ADR 0004](docs/adr/0004-rls-wiring.md)).
+
 ### Administrativo is a real role and not a v1 user
 
 The person at the mostrador exists and is **not in the software**. The app has nothing for them yet, so
@@ -924,8 +945,79 @@ instead of at the law.
 |---|---|
 | A price list | The total is the Bioquímico's call and moves per patient. A list would be overridden every time. |
 | Coseguro rules per obra social | See above: twenty methods, maintained by us, wrong in silence. |
-| **The monthly presentación to obras sociales** | The circuit a lab lives off, and a process of its own — [#8](https://github.com/FrancoLedArg/lab/issues/8). Cheap to defer: everything it needs (obra social, per-práctica authorization, the month's UB value, código NBU) is already recorded for the copago. Same data, another screen. |
 | MercadoPago, both flows | We process no money at all. The research stands on [#3](https://github.com/FrancoLedArg/lab/issues/3). |
 | Reading the comprobante with AI | See above. |
 | A bank-account model | There is one account. |
 | The AFIP/ARCA factura | Nobody asked, and no payment processor issues it ([#3](https://github.com/FrancoLedArg/lab/issues/3)). The lab invoices the way it invoices today. |
+
+---
+
+## The presentación — settled by [#8](https://github.com/FrancoLedArg/lab/issues/8)
+
+### What it is
+
+The lab is paid for obra social work **through the Colegio de Bioquímicos**, never by the obra social
+directly. At the visit the técnica loads the prácticas into **the Colegio's software**; when the
+authorization arrives she prints the **cupón** from it, and the afiliado and the bioquímica both sign it.
+The cupón shows UB, not pesos. All of this is the Colegio's software and paper, and stays so: **the app
+sends nothing to the Colegio.**
+
+A **Presentación** is one obra social, one month, one lab: every OrderedPractice of that obra social
+marked *authorized* in that month. **The month is the date the authorization was marked** — the técnica
+marks it the day she prints the cupón, so Ana drawn on 30 October and authorized on 2 November is
+November. **The app assembles it; there is no screen to build one.**
+
+What the lab gets out of it is what nothing records today: **previsibilidad** — how much comes in, and
+when — and **control** — what the Colegio did not recognize, so the bioquímica can ask why.
+
+### What the Dueño does with it
+
+1. **Fecha de pago.** Typed per Presentación when the Colegio says it (IOSEP julio → 1/11); the Colegio
+   does not publish it. Empty shows *sin confirmar*. Past with nothing cobrado shows *vencida, sin
+   cobrar* — the guard for forgetting, like a stale UB value showing its date. **No rule like "IOSEP pays
+   at three months"**: the month IOSEP is late, the rule shows a false date and nobody is told.
+2. **Cobro.** The Colegio sends a transfer and a document with the detail. The Dueño types the amount
+   that arrived for each Presentación off that document, so one transfer covering several obras sociales
+   needs nothing more.
+3. **Control.** The document lists what was recognized, line by line. The app lists what was presented,
+   and she ticks each line she finds on the paper. **What stays unticked is a débito.**
+4. **Débito.** It is never presented again; it is a loss. It carries a note — what she will ask the
+   Colegio — and stays open until she marks it *cerrado*.
+
+### Evidence photos
+
+The orden and the signed cupón go to the Colegio, so after a débito the lab holds nothing to argue with.
+So the técnica **photographs every paper** — the orden and the cupón — and the photos sit on the
+**Orden**.
+
+**They are deleted by a person pressing a button, never by a timer** (there are no background jobs,
+[ADR 0004](docs/adr/0004-rls-wiring.md)):
+
+- *ya cobré* on a Presentación deletes the photos of what was recognized;
+- a débito's photos go when it is marked *cerrado*.
+
+One Orden can hold prácticas of two obras sociales, so a photo goes when nothing on its Orden still needs
+it. The photos are health data; they live where the rest of the data lives
+([ADR 0003](docs/adr/0003-postgres-on-donweb.md)) and only until the money is in.
+
+### Open — decided when the module is built
+
+| Open | What it blocks |
+|---|---|
+| **What each obra social actually pays** — whether it subtracts the copago, and how. *"Depende de cada obra social."* | the expected amount |
+| **The share the Colegio keeps** | the expected amount |
+| Whether the Colegio publishes its payment calendar | nothing: the date is typed either way |
+
+**Until then the app shows no expected amount** — the UB presented, the fecha de pago, and what was
+cobrado. A gross ceiling (UB × the obra social's UB value) was offered and turned down: the user wants
+what will really be paid, and a computed number that looks right and is not is exactly what
+*we never encode an obra social's method* rules out.
+
+### Deliberate v1 cuts
+
+| Cut | Why |
+|---|---|
+| Sending anything to the Colegio | Its own software and the signed cupón are the channel. |
+| Re-presenting a débito | The Colegio does not allow it. |
+| A payment-delay rule per obra social | Wrong in silence the month an obra social is late. |
+| Facturación to the Colegio | Still its own topic ([#22](https://github.com/FrancoLedArg/lab/issues/22)). |
