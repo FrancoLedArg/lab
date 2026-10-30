@@ -3,7 +3,9 @@
 **Status**: accepted. Settled by [#14](https://github.com/FrancoLedArg/lab/issues/14).
 
 Hosting is **DonWeb**, on a Cloud Server, with **plain PostgreSQL in Docker** and tenant isolation via
-RLS driven by per-transaction session settings. One deployable, server-rendered. Postgres itself was
+RLS driven by per-transaction session settings. One deployable: a single Node process serving the API
+and the built frontend ([ADR 0005](0005-stack.md); this line said "server-rendered", with no reason
+behind it). Postgres itself was
 not a choice here — [#11](https://github.com/FrancoLedArg/lab/issues/11) locked it for RLS.
 
 DonWeb was the operator's call; the decision recorded here is **what we run on it**, because DonWeb

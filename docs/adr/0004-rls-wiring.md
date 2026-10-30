@@ -1,7 +1,8 @@
 # How row-level security is wired
 
 **Status**: accepted. Settled by [#28](https://github.com/FrancoLedArg/lab/issues/28), on the mechanics
-taught in [#29](https://github.com/FrancoLedArg/lab/issues/29).
+taught in [#29](https://github.com/FrancoLedArg/lab/issues/29). Amended by
+[ADR 0005](0005-stack.md): the lab travels in the tRPC input, and a fourth role, `auth`, serves login.
 
 Two labs share one set of tables, and RLS is the wall between them
 ([#11](https://github.com/FrancoLedArg/lab/issues/11)). This records how the wall is wired. Several
@@ -11,22 +12,24 @@ intruder — anyone running code inside the app can set the context.
 
 ## The request
 
-- **The lab is in the URL** (`/labs/<lab>/...`); the session holds only the person. Each browser tab
-  is self-consistent, and *switch lab* is a link.
-- Middleware, inside the request's transaction, runs `set_config('app.lab_id', $1, true)` and the same
-  for `app.user_id` — never a handler. The `true` makes Postgres undo both at every exit from the
+- **The lab is in the page URL** (`/labs/<lab>/...`), and every request carries it from there — as
+  the `labId` in each tRPC procedure's input ([ADR 0005](0005-stack.md)). The session holds only the
+  person. Each browser tab is self-consistent, and *switch lab* is a link.
+- Middleware — the tRPC `labProcedure` — runs, inside the request's transaction,
+  `set_config('app.lab_id', $1, true)` and the same for `app.user_id` — never a handler. The `true` makes Postgres undo both at every exit from the
   transaction, so no cleanup code exists to be forgotten, and transaction-mode pooling stays safe.
 - **The database judges membership**: every lab policy is
   `lab_id = current_setting('app.lab_id')::uuid and app.is_member(lab_id)`, with `is_member` a
   `stable security definer` function. The app's own check exists only to produce a 404.
 - **Missing context raises.** Zero rows looks like a quiet day and ships; an error is found in a minute.
 
-## Three Postgres roles, and `force`
+## Four Postgres roles, and `force`
 
 | Role | Used by | RLS |
 |---|---|---|
 | `owner` | migrations only; owns every table | applies, through `force row level security` |
 | `app` | the app; owns nothing, no `BYPASSRLS` | applies |
+| `auth` | Better Auth only ([ADR 0005](0005-stack.md)); touches only its tables | applies: a `to auth` policy on those tables |
 | `backup` | the daily dump ([ADR 0003](0003-postgres-on-donweb.md)); read-only | **bypassed** |
 
 Postgres skips policies for a table's owner, so an app connected as the owner has RLS that does
@@ -67,7 +70,8 @@ confirmed at the counter ([#6](https://github.com/FrancoLedArg/lab/issues/6)). S
 Users and Memberships are created by hand ([ADR 0002](0002-v1-is-two-labs.md)), and **nobody ever
 knows another person's credential**: if whoever creates the account sets the password, they can
 validate under the Bioquímico's name. No password also means no reset flow. Finding the User by phone
-before anyone is logged in is a narrow `security definer` function, not a policy.
+before anyone is logged in is done by Better Auth connected as the `auth` role, not by a policy on
+`app` ([ADR 0005](0005-stack.md); this was a `security definer` function before).
 
 The risk, accepted: while WhatsApp is down nobody can start a new session. Open sessions keep working.
 
@@ -75,4 +79,5 @@ The risk, accepted: while WhatsApp is down nobody can start a new session. Open 
 
 The isolation test: connect as `app`, set lab A, read every table, see nothing of lab B. It must
 include the failure path — a transaction that throws, then a new one on the **same** connection that
-reads without setting the lab, and must raise. That assertion fails if `true` becomes `false`.
+reads without setting the lab, and must raise. That assertion fails if `true` becomes `false`. And
+`app` reading Better Auth's session table must fail.
