@@ -1,6 +1,7 @@
 # Rules
 
 @.agents/rules/ponytail.md
+@.agents/rules/stack.md
 
 ## Agent skills
 
